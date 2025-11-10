@@ -1,0 +1,5 @@
+path: D:\yoloTrain\data
+train: D:\yoloTrain\data\train\images
+val: D:\yoloTrain\data\validation\images
+nc: 6
+names: ["Black_Head", "Lay_eggs", "Rice_Weevil", "Stone", "paddy", "rice_worm"]
