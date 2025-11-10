@@ -2,6 +2,7 @@ outputs/
 data/
 runs/
 custom_data/
+venv/
 *.pt
 *.mp4
 *.jpg
