@@ -28,7 +28,7 @@ rem yolo detect train data=data.yaml model=yolo11m.pt epochs=60 imgsz=640
 rem    แม่นยำสูงสุดที่ 0.95 ++++   
 
 
-rem yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 
+yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 
 
 
 
