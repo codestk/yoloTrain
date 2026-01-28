@@ -26,12 +26,7 @@ echo [ขั้นตอนที่ 3/4] กำลังเริ่มกา�
 rem yolo detect train data=data.yaml model=yolo11m.pt epochs=60 imgsz=640
 
 rem    แม่นยำสูงสุดที่ 0.95 ++++   
-
-
-rem yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 
-
-
-
+yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 
 rem yolo detect train data=data.yaml model=yolo11s.pt epochs=200    imgsz=640   
 
 rem yolo detect train data=data.yaml  model=yolov8s  epochs=180 imgsz=640 batch=16 lr0=0.001 patience=10
@@ -47,21 +42,27 @@ echo Model training complete.
 echo
 timeout /t 2 > nul
 
+echo [ขั้นตอนที่ 4/4] กำลังค้นหาโมเดลล่าสุดและเริ่มการตรวจจับ...
+set "LATEST_RUN="
+for /d %%i in (runs\detect\train*) do set "LATEST_RUN=%%i"
 
-
-@echo off
-echo Copying YOLO model...
-
-copy /Y "D:\yoloTrain\runs\detect\train\weights\best.pt" "D:\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
-copy /Y "D:\yoloTrain\runs\detect\train\weights\best.pt"  "\\192.168.1.60\i\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
-
-if %errorlevel% equ 0 (
-    echo Copy success ✅
-) else (
-    echo Copy failed ❌
+if not defined LATEST_RUN (
+    echo.
+    echo [เกิดข้อผิดพลาด] ไม่พบโฟลเดอร์ผลการฝึกสอน (train)
+    echo.
+    pause
+    exit /b
 )
 
-pause
- 
+set "MODEL_PATH=%LATEST_RUN%\weights\best.pt"
+echo พบโมเดลล่าสุดที่: %MODEL_PATH%
+echo.
+echo Starting detection...
+rem python yolo_detect.py --model="%MODEL_PATH%" --source=usb0 --imgsz=640 --conf=0.25 --save-txt --save-conf --project="runs/detect" --name="latest_detection"
+python yolo_detect.py
 
- 
+echo.
+
+echo --- Full Workflow Finished ---
+echo.
+pause
