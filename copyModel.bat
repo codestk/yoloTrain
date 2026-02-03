@@ -1,1 +1,0 @@
-     "D:\yoloTrain\runs\detect\train\weights\best.pt"  "D:\rice_anomaly_detection_PyTorch\models\yolo\best.pt"

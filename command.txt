@@ -34,3 +34,9 @@ python yolo_detect.py --model=D:\yoloTrain\runs\detect\train2\weights\best.pt --
 
 conda activate yolo11-env
 
+
+
+//----------------------------------------
+& D:/yoloTrain/venv/Scripts/Activate.ps1          
+.\Train.bat      
+

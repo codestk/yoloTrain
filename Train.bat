@@ -7,6 +7,9 @@ echo   Starting Automatic Full YOLO Workflow...
 echo =================================================================
 echo.
 
+
+
+
 echo [ขั้นตอนที่ 1/4] กำลังลบโฟลเดอร์เก่า (custom_data, data, runs)...
 
 if exist "data" ( rd /s /q "data" )
@@ -28,9 +31,9 @@ rem yolo detect train data=data.yaml model=yolo11m.pt epochs=60 imgsz=640
 rem    แม่นยำสูงสุดที่ 0.95 ++++   
 
 
-yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 
+rem yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 
 
-
+yolo detect train data=data.yaml model="D:\rice_anomaly_detection_PyTorch\models\yolo\best.pt" epochs=80 imgsz=640
 
 rem yolo detect train data=data.yaml model=yolo11s.pt epochs=200    imgsz=640   
 
@@ -54,7 +57,7 @@ echo Copying YOLO model...
 
 copy /Y "D:\yoloTrain\runs\detect\train\weights\best.pt" "D:\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
 copy /Y "D:\yoloTrain\runs\detect\train\weights\best.pt"  "\\192.168.1.60\i\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
-
+copy /Y "D:\yoloTrain\runs\detect\train\weights\best.pt"  "D:\LM-Backend\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
 if %errorlevel% equ 0 (
     echo Copy success ✅
 ) else (

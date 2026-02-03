@@ -1,5 +1,5 @@
 path: D:\yoloTrain\data
 train: D:\yoloTrain\data\train\images
 val: D:\yoloTrain\data\validation\images
-nc: 12
-names: ["Butterfly", "Lay_eggs", "Rice_Small_Worm", "Rice_Weevil", "Rice_partial_mill", "Rice_straw", "Seed", "Small_hair", "Stone", "paddy", "rice_worm", "wood"]
+nc: 14
+names: ["Black_head", "Butterfly", "Lay_eggs", "Rice_Small_Worm", "Rice_Weevil", "Rice_partial_mill", "Rice_straw", "Seed", "Small_hair", "Stone", "paddy", "rice_worm", "wood", "yellow_grain"]
