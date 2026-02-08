@@ -30,10 +30,12 @@ rem yolo detect train data=data.yaml model=yolo11m.pt epochs=60 imgsz=640
 
 rem    แม่นยำสูงสุดที่ 0.95 ++++   
 
-rem yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 
+yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 
 
-yolo detect train data=data.yaml model="D:\rice_anomaly_detection_PyTorch\models\yolo\best.pt" epochs=180 imgsz=640
+rem yolo detect train data=data.yaml model="D:\rice_anomaly_detection_PyTorch\models\yolo\best.pt" epochs=180 imgsz=640
 
+rem yolo detect train data="data.yaml" model=yolov8s.pt  epochs=180  imgsz=640 device=0 batch=8 workers=4 
+ 
  
 
 
@@ -47,13 +49,23 @@ timeout /t 2 > nul
 echo Copying YOLO model...
 
 copy /Y "D:\yoloTrain\runs\detect\train\weights\best.pt" "D:\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
-copy /Y "D:\yoloTrain\runs\detect\train\weights\best.pt"  "\\192.168.1.60\i\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
+copy /Y "D:\yoloTrain\runs\detect\train\weights\best.pt"  "\\192.168.1.33\c\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
+copy /Y "D:\yoloTrain\runs\detect\train\weights\best.pt"  "\\192.168.1.33\d\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
 copy /Y "D:\yoloTrain\runs\detect\train\weights\best.pt"  "D:\LM-Backend\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
 if %errorlevel% equ 0 (
     echo Copy success ✅
 ) else (
     echo Copy failed ❌
 )
+
+
+
+ 
+powershell -c (New-Object Media.SoundPlayer "C:\Windows\Media\Alarm01.wav").PlaySync()
+ 
+powershell -c (New-Object Media.SoundPlayer "C:\Windows\Media\Alarm01.wav").PlaySync()
+ 
+powershell -c (New-Object Media.SoundPlayer "C:\Windows\Media\Alarm01.wav").PlaySync()
 
 pause
  
