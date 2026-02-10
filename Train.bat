@@ -30,7 +30,7 @@ rem yolo detect train data=data.yaml model=yolo11m.pt epochs=60 imgsz=640
 
 rem    แม่นยำสูงสุดที่ 0.95 ++++   
 
-yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 
+yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 device=0 batch=16 workers=4
 
 rem yolo detect train data=data.yaml model="D:\rice_anomaly_detection_PyTorch\models\yolo\best.pt" epochs=180 imgsz=640
 
