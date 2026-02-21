@@ -3,103 +3,127 @@ chcp 65001 > nul
 setlocal enabledelayedexpansion
 title Automatic Full YOLO Workflow
 
-:: เข้าไปที่โฟลเดอร์โปรเจกต์
-cd /d "D:\yoloTrain"
+cd /d "C:\yoloTrain"
 
-:: Activate venv
 call .\venv\Scripts\activate
+set "VENV_PYTHON=C:\yoloTrain\venv\Scripts\python.exe"
+set "VENV_PIP=C:\yoloTrain\venv\Scripts\pip.exe"
+set "VENV_YOLO=C:\yoloTrain\venv\Scripts\yolo.exe"
 
+if not exist "%VENV_PYTHON%" (
+    echo [ERROR] venv python not found: "%VENV_PYTHON%"
+    goto :END
+)
 
+if not exist "%VENV_YOLO%" (
+    echo [INFO] yolo.exe not found in venv. Installing ultralytics...
+    "%VENV_PIP%" install ultralytics
+    if not exist "%VENV_YOLO%" (
+        echo [ERROR] Failed to install ultralytics/yolo in venv.
+        goto :END
+    )
+)
 
-REM =================================================================
-REM  [START] เริ่มจับเวลา
-REM =================================================================
 set "startTime=%time%"
-echo =================================================================
+echo ================================================================
 echo   Starting Automatic Full YOLO Workflow...
 echo   Start Time : %startTime%
-echo =================================================================
+echo ================================================================
 echo.
 
-REM =================================================================
-REM  [Step 1] ลบโฟลเดอร์เก่า
-REM =================================================================
-echo [ขั้นตอนที่ 1/4] กำลังลบโฟลเดอร์เก่า (custom_data, data, runs)...
-if exist "data" ( rd /s /q "data" )
-if exist "runs" ( rd /s /q "runs" )
+echo [Step 1/4] Cleaning old folders (data, runs)...
+if exist "data" rd /s /q "data"
+if exist "runs" rd /s /q "runs"
 echo Cleanup complete.
 echo.
 timeout /t 2 > nul
 
-REM =================================================================
-REM  [Step 2] เตรียมข้อมูล
-REM =================================================================
-echo [ขั้นตอนที่ 2/4] กำลังเตรียมข้อมูล Split Data YAML...
-python train_val_split.py --datapath="D:\yoloTrain\custom_data" --train_pct=.9
-python.exe dataYaml.py
+echo [Step 2/4] Preparing dataset split and YAML...
+"%VENV_PYTHON%" train_val_split.py --datapath="C:\yoloTrain\custom_data" --train_pct=.9
+if errorlevel 1 (
+    echo [ERROR] train_val_split.py failed.
+    goto :END
+)
+"%VENV_PYTHON%" dataYaml.py
+if errorlevel 1 (
+    echo [ERROR] dataYaml.py failed.
+    goto :END
+)
 echo Data preparation complete.
 echo.
 timeout /t 2 > nul
 
-REM =================================================================
-REM  [Step 3] เริ่มเทรนโมเดล
-REM =================================================================
-echo [ขั้นตอนที่ 3/4] กำลังเริ่มการฝึกสอนโมเดล YOLOv8s...
-REM คำสั่งเทรนที่คุณเลือกใช้
-yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 
-
-echo.
+echo [Step 3/4] Training YOLOv8s...
+echo [INFO] Installing NumPy 1.26.4 for compatibility...
+"%VENV_PIP%" install numpy==1.26.4
+if errorlevel 1 (
+    echo [ERROR] Failed to install NumPy 1.26.4.
+    goto :END
+)
+echo [INFO] Checking CUDA availability in venv torch...
+call :CHECK_CUDA
+if errorlevel 1 (
+    echo [WARN] CUDA not available. Installing CUDA-enabled PyTorch cu124...
+    "%VENV_PIP%" install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+    if errorlevel 1 (
+        echo [ERROR] Failed to install CUDA-enabled PyTorch.
+        goto :END
+    )
+    echo [INFO] Re-checking CUDA after torch install...
+    call :CHECK_CUDA
+    if errorlevel 1 (
+        echo [ERROR] CUDA still unavailable in this venv.
+        echo [HINT] Check NVIDIA driver with: nvidia-smi
+        echo [HINT] Then reopen terminal and run Train.bat again.
+        goto :END
+    )
+)
+echo [INFO] Training device: GPU 0
+"%VENV_YOLO%" detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 project=C:\yoloTrain\runs name=train workers=4 device=0
+if errorlevel 1 (
+    echo [ERROR] Training command failed.
+    goto :COPY_CHECK
+)
 echo Model training process finished.
 timeout /t 2 > nul
 
-REM =================================================================
-REM  [Step 4] ตรวจสอบความถูกต้องและ Copy ไฟล์
-REM =================================================================
-echo [ขั้นตอนที่ 4/4] Verifying and Copying Model...
-
-set "sourceFile=D:\yoloTrain\runs\detect\train\weights\best.pt"
+:COPY_CHECK
+echo [Step 4/4] Verifying and copying model...
+set "sourceFile=C:\yoloTrain\runs\train\weights\best.pt"
 set "destFile=D:\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
 
-REM เช็คว่าไฟล์ best.pt มีอยู่จริงไหม (ถ้าเทรน error ไฟล์จะไม่มี)
 if exist "%sourceFile%" (
-    echo [INFO] Found best.pt successfully.
-    echo [INFO] Copying to project folder...
-    
+    echo [INFO] Found best.pt
     copy /Y "%sourceFile%" "%destFile%"
-    
-    if !errorlevel! equ 0 (
-        echo [SUCCESS] Copy success ✅
+    if errorlevel 1 (
+        echo [ERROR] Copy failed.
     ) else (
-        echo [ERROR] Copy failed ❌
+        echo [SUCCESS] Copy complete.
     )
 ) else (
-    echo.
-    echo =========================================================
-    echo [CRITICAL ERROR] Training FAILED or Interrupted! 
-    echo File 'best.pt' not found.
-    echo [SKIP] Skipping file copy to protect old model.
-    echo =========================================================
-    echo.
+    echo [CRITICAL] Training failed or interrupted. best.pt not found.
+    echo [SKIP] Copy skipped to protect existing model.
 )
 
-REM =================================================================
-REM  [END] แจ้งเตือนเสียง และ สรุปเวลา
-REM =================================================================
+:END
 powershell -c (New-Object Media.SoundPlayer "C:\Windows\Media\Alarm01.wav").PlaySync()
 powershell -c (New-Object Media.SoundPlayer "C:\Windows\Media\Alarm01.wav").PlaySync()
 powershell -c (New-Object Media.SoundPlayer "C:\Windows\Media\Alarm01.wav").PlaySync()
 
 set "endTime=%time%"
 echo.
-echo =================================================================
+echo ================================================================
 echo   WORKFLOW SUMMARY
-echo =================================================================
+echo ================================================================
 echo   Start Time : %startTime%
 echo   End Time   : %endTime%
 echo.
-REM คำนวณเวลาที่ใช้จริง
 powershell -Command "$s=[datetime]::Parse('%startTime%'); $e=[datetime]::Parse('%endTime%'); if ($e -lt $s) { $e = $e.AddDays(1) }; $diff=$e-$s; Write-Host ('   Total Duration : ' + $diff.ToString('hh\:mm\:ss')) -ForegroundColor Cyan"
-echo =================================================================
+echo ================================================================
 echo.
-
 pause
+goto :EOF
+
+:CHECK_CUDA
+"%VENV_PYTHON%" -c "import torch,sys; sys.exit(0 if torch.cuda.is_available() else 1)"
+exit /b %errorlevel%
