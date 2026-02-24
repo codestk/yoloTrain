@@ -53,37 +53,14 @@ echo Data preparation complete.
 echo.
 timeout /t 2 > nul
 
-echo [Step 3/4] Training YOLOv8s...
-echo [INFO] Installing NumPy 1.26.4 for compatibility...
-"%VENV_PIP%" install numpy==1.26.4
-if errorlevel 1 (
-    echo [ERROR] Failed to install NumPy 1.26.4.
-    goto :END
-)
-echo [INFO] Checking CUDA availability in venv torch...
-call :CHECK_CUDA
-if errorlevel 1 (
-    echo [WARN] CUDA not available. Installing CUDA-enabled PyTorch cu124...
-    "%VENV_PIP%" install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-    if errorlevel 1 (
-        echo [ERROR] Failed to install CUDA-enabled PyTorch.
-        goto :END
-    )
-    echo [INFO] Re-checking CUDA after torch install...
-    call :CHECK_CUDA
-    if errorlevel 1 (
-        echo [ERROR] CUDA still unavailable in this venv.
-        echo [HINT] Check NVIDIA driver with: nvidia-smi
-        echo [HINT] Then reopen terminal and run Train.bat again.
-        goto :END
-    )
-)
-echo [INFO] Training device: GPU 0
-"%VENV_YOLO%" detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 project=C:\yoloTrain\runs name=train workers=2 device=0
-if errorlevel 1 (
-    echo [ERROR] Training command failed.
-    goto :COPY_CHECK
-)
+REM =================================================================
+REM  [Step 3] เริ่มเทรนโมเดล
+REM =================================================================
+echo [ขั้นตอนที่ 3/4] กำลังเริ่มการฝึกสอนโมเดล YOLOv8s...
+REM คำสั่งเทรนที่คุณเลือกใช้
+yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 
+
+echo.
 echo Model training process finished.
 timeout /t 2 > nul
 
