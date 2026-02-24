@@ -9,7 +9,7 @@ def create_data_yaml(path_to_classes_txt, path_to_data_yaml):
         classes = [line.strip() for line in f if line.strip()]
 
     # 2) สร้าง path ให้ชัวร์ด้วย os.path.join (กันปัญหา \t, \v)
-    base = r'D:\yoloTrain\data'
+    base = r'C:\yoloTrain\data'
     train_images = os.path.join(base, 'train', 'images')
     val_images   = os.path.join(base, 'validation', 'images')
 

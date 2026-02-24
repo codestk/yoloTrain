@@ -1,0 +1,1 @@
+python -c "import torch; print('torch',torch.__version__,'cuda',torch.version.cuda); print('is_available',torch.cuda.is_available()); print('gpu',torch.cuda.get_device_name(0) if torch.cuda.is_available() else None); print('cap',torch.cuda.get_device_capability(0) if torch.cuda.is_available() else None)"
