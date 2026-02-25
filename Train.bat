@@ -58,7 +58,7 @@ REM  [Step 3] เริ่มเทรนโมเดล
 REM =================================================================
 echo [ขั้นตอนที่ 3/4] กำลังเริ่มการฝึกสอนโมเดล YOLOv8s...
 REM คำสั่งเทรนที่คุณเลือกใช้
-yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640 
+yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640  wokers=2
 
 echo.
 echo Model training process finished.
@@ -67,7 +67,7 @@ timeout /t 2 > nul
 :COPY_CHECK
 echo [Step 4/4] Verifying and copying model...
 set "sourceFile=C:\yoloTrain\runs\train\weights\best.pt"
-set "destFile=D:\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
+set "destFile=C:\LM-Backend\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
 
 if exist "%sourceFile%" (
     echo [INFO] Found best.pt
