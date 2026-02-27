@@ -36,7 +36,7 @@ if exist "data" rd /s /q "data"
 if exist "runs" rd /s /q "runs"
 echo Cleanup complete.
 echo.
-timeout /t 2 > nul
+timeout /t 5 > nul
 
 echo [Step 2/4] Preparing dataset split and YAML...
 "%VENV_PYTHON%" train_val_split.py --datapath="C:\yoloTrain\custom_data" --train_pct=.9
@@ -51,7 +51,7 @@ if errorlevel 1 (
 )
 echo Data preparation complete.
 echo.
-rem timeout /t 2 > nul
+timeout /t 10 > nul
 
 REM =================================================================
 REM  [Step 3] เริ่มเทรนโมเดล
@@ -62,7 +62,7 @@ REM yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640   dev
 yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640   device=0  
 echo.
 echo Model training process finished.
-rem timeout /t 10 > nul
+timeout /t 15 > nul
 
 :COPY_CHECK
 echo [Step 4/4] Verifying and copying model...
