@@ -51,35 +51,32 @@ if errorlevel 1 (
 )
 echo Data preparation complete.
 echo.
-timeout /t 2 > nul
+rem timeout /t 2 > nul
 
 REM =================================================================
 REM  [Step 3] เริ่มเทรนโมเดล
 REM =================================================================
 echo [ขั้นตอนที่ 3/4] กำลังเริ่มการฝึกสอนโมเดล YOLOv8s...
 REM คำสั่งเทรนที่คุณเลือกใช้
-yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640  wokers=2
-
+REM yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640   device=0 workers=2
+yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640   device=0  
 echo.
 echo Model training process finished.
-timeout /t 2 > nul
+rem timeout /t 10 > nul
 
 :COPY_CHECK
 echo [Step 4/4] Verifying and copying model...
-set "sourceFile=C:\yoloTrain\runs\train\weights\best.pt"
-set "destFile=C:\LM-Backend\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
+@echo off
+set "src=C:\yoloTrain\runs\train\weights\best.pt"
+set "dst1=C:\LM-Backend\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
+set "dst2=\\Detect-Noebook\D\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
 
-if exist "%sourceFile%" (
-    echo [INFO] Found best.pt
-    copy /Y "%sourceFile%" "%destFile%"
-    if errorlevel 1 (
-        echo [ERROR] Copy failed.
-    ) else (
-        echo [SUCCESS] Copy complete.
-    )
+if exist "%src%" (
+    copy /Y "%src%" "%dst1%"
+    copy /Y "%src%" "%dst2%"
+    echo [OK] Model updated and backed up.
 ) else (
-    echo [CRITICAL] Training failed or interrupted. best.pt not found.
-    echo [SKIP] Copy skipped to protect existing model.
+    echo [!] Error: source file not found.
 )
 
 :END
