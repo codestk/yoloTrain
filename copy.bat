@@ -26,4 +26,5 @@ powershell -c (New-Object Media.SoundPlayer "C:\Windows\Media\Alarm01.wav").Play
 powershell -c (New-Object Media.SoundPlayer "C:\Windows\Media\Alarm01.wav").PlaySync()
 powershell -c (New-Object Media.SoundPlayer "C:\Windows\Media\Alarm01.wav").PlaySync()
 
+ y
  

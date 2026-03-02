@@ -9,23 +9,21 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--datapath', help='Path to data folder containing image and annotation files',
                     required=True)
-parser.add_argument('--train_pct', help='Ratio of images to go to train folder; \
-                    the rest go to validation folder (example: ".8")',
-                    default=.8)
+parser.add_argument('--train_pct', help='Ratio of images to go to train folder (example: ".8")',
+                    default=.8, type=float)
 
 args = parser.parse_args()
 
 data_path = args.datapath
-train_percent = float(args.train_pct)
+train_percent = args.train_pct
 
 # --- Check for valid entries ---
 if not os.path.isdir(data_path):
-    print(f'ERROR: Directory specified by --datapath "{data_path}" not found. Please verify the path is correct.')
+    print(f'ERROR: Directory specified by --datapath "{data_path}" not found.')
     sys.exit(0)
 if train_percent < .01 or train_percent > 0.99:
     print('ERROR: Invalid entry for train_pct. Please enter a number between .01 and .99.')
     sys.exit(0)
-val_percent = 1 - train_percent
 
 # --- Define path to input dataset ---
 input_image_path = os.path.join(data_path, 'images')
@@ -42,47 +40,138 @@ train_txt_path = os.path.join(cwd, 'data/train/labels')
 val_img_path = os.path.join(cwd, 'data/validation/images')
 val_txt_path = os.path.join(cwd, 'data/validation/labels')
 
-# --- Create folders if they don't already exist ---
+# --- CLEANUP & Create folders ---
+# This prevents data leakage if the script is interrupted and run again!
 for dir_path in [train_img_path, train_txt_path, val_img_path, val_txt_path]:
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-        print(f'Created folder at {dir_path}.')
+    if os.path.exists(dir_path):
+        shutil.rmtree(dir_path) # Wipes the old folder completely
+    os.makedirs(dir_path)
+    print(f'Created clean folder at {dir_path}.')
 
-# --- Get list of all images and annotation files ---
+# --- Get list of all images ---
 img_file_list = [path for path in Path(input_image_path).rglob('*') if path.suffix.lower() in ['.jpg', '.jpeg', '.png']]
 print(f'Found {len(img_file_list)} image files.')
 
-# --- Determine number of files to move to each folder ---
+# --- Determine number of files to move ---
 file_num = len(img_file_list)
 train_num = int(file_num * train_percent)
 val_num = file_num - train_num
 print(f'Images moving to train: {train_num}')
 print(f'Images moving to validation: {val_num}')
 
-# --- Select files randomly and copy them to train or val folders ---
-img_file_list_copy = img_file_list.copy() # Work on a copy
-for i, set_num in enumerate([train_num, val_num]):
-    for ii in range(set_num):
-        if not img_file_list_copy:
-            print("Warning: Ran out of images to process.")
-            break
-            
-        img_path = random.choice(img_file_list_copy)
+# --- Shuffle once and split (Much faster than random.choice + remove) ---
+random.shuffle(img_file_list)
+train_files = img_file_list[:train_num]
+val_files = img_file_list[train_num:]
+
+# --- Copy helper function ---
+def copy_dataset_files(files, dest_img_dir, dest_txt_dir):
+    for img_path in files:
         img_fn = img_path.name
-        base_fn = img_path.stem
-        txt_fn = base_fn + '.txt'
+        txt_fn = img_path.stem + '.txt'
         txt_path = os.path.join(input_label_path, txt_fn)
 
-        if i == 0:  # Copy first set of files to train folders
-            new_img_path, new_txt_path = train_img_path, train_txt_path
-        elif i == 1:  # Copy second set of files to the validation folders
-            new_img_path, new_txt_path = val_img_path, val_txt_path
-
-        shutil.copy(img_path, os.path.join(new_img_path, img_fn))
+        # Copy Image
+        shutil.copy(img_path, os.path.join(dest_img_dir, img_fn))
         
-        if os.path.exists(txt_path):  # If txt path does not exist, this is a background image, so skip txt file
-            shutil.copy(txt_path, os.path.join(new_txt_path, txt_fn))
+        # Copy Label (if it exists)
+        if os.path.exists(txt_path):
+            shutil.copy(txt_path, os.path.join(dest_txt_dir, txt_fn))
 
-        img_file_list_copy.remove(img_path)
+# --- Execute Copy ---
+print("Copying training data...")
+copy_dataset_files(train_files, train_img_path, train_txt_path)
+
+print("Copying validation data...")
+copy_dataset_files(val_files, val_img_path, val_txt_path)
 
 print("Data splitting process complete.")
+
+# from pathlib import Path
+# import random
+# import os
+# import sys
+# import shutil
+# import argparse
+
+# # --- Define and parse user input arguments ---
+# parser = argparse.ArgumentParser()
+# parser.add_argument('--datapath', help='Path to data folder containing image and annotation files',
+#                     required=True)
+# parser.add_argument('--train_pct', help='Ratio of images to go to train folder; \
+#                     the rest go to validation folder (example: ".8")',
+#                     default=.8)
+
+# args = parser.parse_args()
+
+# data_path = args.datapath
+# train_percent = float(args.train_pct)
+
+# # --- Check for valid entries ---
+# if not os.path.isdir(data_path):
+#     print(f'ERROR: Directory specified by --datapath "{data_path}" not found. Please verify the path is correct.')
+#     sys.exit(0)
+# if train_percent < .01 or train_percent > 0.99:
+#     print('ERROR: Invalid entry for train_pct. Please enter a number between .01 and .99.')
+#     sys.exit(0)
+# val_percent = 1 - train_percent
+
+# # --- Define path to input dataset ---
+# input_image_path = os.path.join(data_path, 'images')
+# input_label_path = os.path.join(data_path, 'labels')
+
+# if not os.path.isdir(input_image_path) or not os.path.isdir(input_label_path):
+#     print(f'ERROR: "images" or "labels" folder not found inside "{data_path}".')
+#     sys.exit(0)
+
+# # --- Define paths to output image and annotation folders ---
+# cwd = os.getcwd()
+# train_img_path = os.path.join(cwd, 'data/train/images')
+# train_txt_path = os.path.join(cwd, 'data/train/labels')
+# val_img_path = os.path.join(cwd, 'data/validation/images')
+# val_txt_path = os.path.join(cwd, 'data/validation/labels')
+
+# # --- Create folders if they don't already exist ---
+# for dir_path in [train_img_path, train_txt_path, val_img_path, val_txt_path]:
+#     if not os.path.exists(dir_path):
+#         os.makedirs(dir_path)
+#         print(f'Created folder at {dir_path}.')
+
+# # --- Get list of all images and annotation files ---
+# img_file_list = [path for path in Path(input_image_path).rglob('*') if path.suffix.lower() in ['.jpg', '.jpeg', '.png']]
+# print(f'Found {len(img_file_list)} image files.')
+
+# # --- Determine number of files to move to each folder ---
+# file_num = len(img_file_list)
+# train_num = int(file_num * train_percent)
+# val_num = file_num - train_num
+# print(f'Images moving to train: {train_num}')
+# print(f'Images moving to validation: {val_num}')
+
+# # --- Select files randomly and copy them to train or val folders ---
+# img_file_list_copy = img_file_list.copy() # Work on a copy
+# for i, set_num in enumerate([train_num, val_num]):
+#     for ii in range(set_num):
+#         if not img_file_list_copy:
+#             print("Warning: Ran out of images to process.")
+#             break
+            
+#         img_path = random.choice(img_file_list_copy)
+#         img_fn = img_path.name
+#         base_fn = img_path.stem
+#         txt_fn = base_fn + '.txt'
+#         txt_path = os.path.join(input_label_path, txt_fn)
+
+#         if i == 0:  # Copy first set of files to train folders
+#             new_img_path, new_txt_path = train_img_path, train_txt_path
+#         elif i == 1:  # Copy second set of files to the validation folders
+#             new_img_path, new_txt_path = val_img_path, val_txt_path
+
+#         shutil.copy(img_path, os.path.join(new_img_path, img_fn))
+        
+#         if os.path.exists(txt_path):  # If txt path does not exist, this is a background image, so skip txt file
+#             shutil.copy(txt_path, os.path.join(new_txt_path, txt_fn))
+
+#         img_file_list_copy.remove(img_path)
+
+# print("Data splitting process complete.")
