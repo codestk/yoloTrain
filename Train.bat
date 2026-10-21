@@ -3,12 +3,12 @@ chcp 65001 > nul
 setlocal enabledelayedexpansion
 title Automatic Full YOLO Workflow
 
-cd /d "C:\yoloTrain"
+cd /d "D:\yoloTrain"
 
 call .\venv\Scripts\activate
-set "VENV_PYTHON=C:\yoloTrain\venv\Scripts\python.exe"
-set "VENV_PIP=C:\yoloTrain\venv\Scripts\pip.exe"
-set "VENV_YOLO=C:\yoloTrain\venv\Scripts\yolo.exe"
+set "VENV_PYTHON=D:\yoloTrain\venv\Scripts\python.exe"
+set "VENV_PIP=D:\yoloTrain\venv\Scripts\pip.exe"
+set "VENV_YOLO=D:\yoloTrain\venv\Scripts\yolo.exe"
 
 if not exist "%VENV_PYTHON%" (
     echo [ERROR] venv python not found: "%VENV_PYTHON%"
@@ -39,7 +39,7 @@ echo.
 timeout /t 5 > nul
 
 echo [Step 2/4] Preparing dataset split and YAML...
-"%VENV_PYTHON%" train_val_split.py --datapath="C:\yoloTrain\custom_data" --train_pct=.9
+"%VENV_PYTHON%" train_val_split.py --datapath="D:\yoloTrain\custom_data" --train_pct=.9
 if errorlevel 1 (
     echo [ERROR] train_val_split.py failed.
     goto :END
@@ -51,7 +51,7 @@ if errorlevel 1 (
 )
 echo Data preparation complete.
 echo.
-timeout /t 10 > nul
+timeout /t 20 > nul
 
 REM =================================================================
 REM  [Step 3] เริ่มเทรนโมเดล
@@ -62,8 +62,8 @@ REM yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640   dev
 rem yolo detect train data=data.yaml model=yolov8s.pt epochs=60 imgsz=640   device=0  
 
 rem yolo detect train data=data.yaml model=yolov8s.pt imgsz=640 epochs=180   device=0
-yolo detect train data=data.yaml model=best.pt imgsz=640 epochs=180   device=0
-
+yolo detect train data=data.yaml model=yolo11s.pt imgsz=640 epochs=180   device=0
+ 
 
 echo.
 echo Model training process finished.
@@ -74,10 +74,10 @@ echo [Step 4/4] Verifying and copying model...
 @echo off
 
 
-set "src=C:\yoloTrain\runs\detect\train\weights\best.pt"
-set "dst1=C:\LM-Backend\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
-set "dst2=\\Detect-Noebook\D\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
-set "dst3=C:\yoloTrain\best.pt"
+set "src=D:\yoloTrain\runs\detect\train\weights\best.pt"
+set "dst1=D:\docker\LM-Backend\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
+set "dst2=d:\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
+set "dst3=D:\yoloTrain\best.pt"
 
 if exist "%src%" (
     copy /Y "%src%" "%dst1%"
@@ -90,9 +90,9 @@ if exist "%src%" (
 
 
 :END
-powershell -c (New-Object Media.SoundPlayer "C:\Windows\Media\Alarm01.wav").PlaySync()
-powershell -c (New-Object Media.SoundPlayer "C:\Windows\Media\Alarm01.wav").PlaySync()
-powershell -c (New-Object Media.SoundPlayer "C:\Windows\Media\Alarm01.wav").PlaySync()
+powershell -c (New-Object Media.SoundPlayer "c:\Windows\Media\Alarm01.wav").PlaySync()
+powershell -c (New-Object Media.SoundPlayer "c:\Windows\Media\Alarm01.wav").PlaySync()
+powershell -c (New-Object Media.SoundPlayer "c:\Windows\Media\Alarm01.wav").PlaySync()
 
 set "endTime=%time%"
 echo.

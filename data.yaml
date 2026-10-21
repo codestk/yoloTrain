@@ -1,5 +1,5 @@
-path: C:\yoloTrain\data
-train: C:\yoloTrain\data\train\images
-val: C:\yoloTrain\data\validation\images
-nc: 14
-names: ["Black_head", "Butterfly", "Lay_eggs", "Rice_Small_Worm", "Rice_Weevil", "Rice_partial_mill", "Rice_straw", "Seed", "Small_hair", "Stone", "paddy", "rice_worm", "wood", "yellow_grain"]
+path: d:\yoloTrain\data
+train: d:\yoloTrain\data\train\images
+val: d:\yoloTrain\data\validation\images
+nc: 24
+names: ["Black_head", "Butterfly", "Chalky_grain", "Damaged_Grain", "Discolored_Grain", "Hair", "Lay_eggs", "Other_reject", "Rice_Weevil", "Rice_Weevil_Small", "Rice_partial_mill", "Rice_partial_mill_light", "Rice_straw", "Rice_worm_rest", "Seed", "Spider", "Sticky_Rice", "Stone", "dot_dust", "dust_clump", "paddy", "rice_dot", "rice_worm", "wood"]
