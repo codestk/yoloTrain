@@ -40,3 +40,11 @@ conda activate yolo11-env
 & D:/yoloTrain/venv/Scripts/Activate.ps1          
 .\Train.bat      
 
+
+
+
+python rice_label_audit_v2.py --data "D:\yoloTrain\custom_data" --model "D:\yoloTrain\runs\detect\train\weights\best.pt" --imgsz 640 --output "D:\yoloTrain\rice_audit_v2_output"
+
+
+
+python rice_label_audit_v2_project9.py --data "D:\yoloTrain\custom_data" --model "D:\yoloTrain\runs\detect\train\weights\best.pt" --output "D:\yoloTrain\rice_audit_v2_output"

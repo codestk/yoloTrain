@@ -61,8 +61,8 @@ REM คำสั่งเทรนที่คุณเลือกใช้
 REM yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640   device=0 workers=2
 rem yolo detect train data=data.yaml model=yolov8s.pt epochs=60 imgsz=640   device=0  
 
-rem yolo detect train data=data.yaml model=yolov8s.pt imgsz=640 epochs=180   device=0
-yolo detect train data=data.yaml model=yolo11s.pt imgsz=640 epochs=180   device=0
+yolo detect train data=data.yaml model=yolov8s.pt imgsz=640 epochs=130   device=0
+rem yolo detect train data=data.yaml model=yolo11s.pt imgsz=640 epochs=180   device=0
  
 
 echo.
@@ -77,7 +77,7 @@ echo [Step 4/4] Verifying and copying model...
 set "src=D:\yoloTrain\runs\detect\train\weights\best.pt"
 set "dst1=D:\docker\LM-Backend\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
 set "dst2=d:\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
-set "dst3=D:\yoloTrain\best.pt"
+set "dst3=D:\docker\LM-Backend-Git\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
 
 if exist "%src%" (
     copy /Y "%src%" "%dst1%"
