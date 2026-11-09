@@ -61,7 +61,12 @@ REM คำสั่งเทรนที่คุณเลือกใช้
 REM yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640   device=0 workers=2
 rem yolo detect train data=data.yaml model=yolov8s.pt epochs=60 imgsz=640   device=0  
 
-yolo detect train data=data.yaml model=yolov8s.pt imgsz=640 epochs=130   device=0
+rem yolo detect train data=data.yaml model=yolov8s.pt imgsz=640 epochs=130   device=0
+
+yolo detect train data=data.yaml model=yolov8s.pt imgsz=960 epochs=150 patience=30 batch=8 workers=4 device=0 cos_lr=True close_mosaic=15 flipud=0.5 degrees=180 name=train_s960
+rem yolo detect train data=data.yaml model=yolov8s.pt imgsz=1280 epochs=130 device=0 batch=-1
+rem yolo detect train data=data.yaml model=yolov8s.pt imgsz=960 epochs=130 device=0 batch=4
+
 rem yolo detect train data=data.yaml model=yolo11s.pt imgsz=640 epochs=130   device=0
  
 
