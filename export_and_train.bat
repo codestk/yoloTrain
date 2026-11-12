@@ -15,58 +15,52 @@ mkdir "D:\yoloTrain\custom_data"
 
 echo.
 echo ==========================================
-echo 2. Exporting dataset from Label Studio...
+echo 2. Exporting annotations (JSON only) from Label Studio...
 echo ==========================================
-docker exec label-studio-label-studio-1 label-studio export 9 YOLO_WITH_IMAGES --export-path=/yolo_export < nul
+docker exec label-studio-label-studio-1 label-studio export 9 JSON --export-path=/yolo_export < nul
 if errorlevel 1 (
     echo [ERROR] Export failed. Training aborted.
     goto :FAIL
 )
 
-echo Waiting for the exported ZIP file to be ready (max 10 minutes)...
+echo Waiting for the exported JSON file (max 10 minutes)...
 set /a WAITED=0
-:WAIT_FOR_ZIP
-if exist "D:\yoloTrain\custom_data\*.zip" goto ZIP_FOUND
+:WAIT_FOR_JSON
+if exist "D:\yoloTrain\custom_data\*.json" goto JSON_FOUND
 if !WAITED! GEQ 600 (
-    echo [ERROR] No ZIP file after 10 minutes. Training aborted.
+    echo [ERROR] No JSON file after 10 minutes. Training aborted.
     goto :FAIL
 )
 timeout /t 1 /nobreak >nul 2>&1
 set /a WAITED+=1
-goto WAIT_FOR_ZIP
+goto WAIT_FOR_JSON
 
-:ZIP_FOUND
+:JSON_FOUND
 rem Give the export a few seconds to finish writing the file
 timeout /t 5 /nobreak >nul 2>&1
-echo ZIP file found! Proceeding to extraction...
+set "EXPORT_JSON="
+for /f "delims=" %%f in ('dir /b /o-d "D:\yoloTrain\custom_data\*.json"') do if not defined EXPORT_JSON set "EXPORT_JSON=D:\yoloTrain\custom_data\%%f"
+echo JSON found: !EXPORT_JSON!
 
 echo.
 echo ==========================================
-echo 3. Extracting files and cleaning up...
+echo 3. Building YOLO dataset from JSON + images in D:\docker\label-studio\media\upload\9 ...
 echo ==========================================
-powershell -NoProfile -Command "Expand-Archive -Path 'D:\yoloTrain\custom_data\*.zip' -DestinationPath 'D:\yoloTrain\custom_data\temp' -Force"
+"D:\yoloTrain\venv\Scripts\python.exe" ls_json_to_yolo.py --json "!EXPORT_JSON!" --upload_dir "D:\docker\label-studio\media\upload\9" --out "D:\yoloTrain\custom_data"
 if errorlevel 1 (
-    echo [ERROR] Could not extract the ZIP file. Training aborted.
+    echo [ERROR] Could not build the YOLO dataset. Training aborted.
     goto :FAIL
 )
-powershell -NoProfile -Command "Move-Item -Path 'D:\yoloTrain\custom_data\temp\*' -Destination 'D:\yoloTrain\custom_data\' -Force"
-powershell -NoProfile -Command "Remove-Item -Path 'D:\yoloTrain\custom_data\*.zip' -Force"
-powershell -NoProfile -Command "Remove-Item -Path 'D:\yoloTrain\custom_data\temp' -Recurse -Force"
 
 if not exist "D:\yoloTrain\custom_data\images" (
-    echo [ERROR] custom_data\images not found after extraction. Training aborted.
+    echo [ERROR] custom_data\images not found. Training aborted.
     goto :FAIL
 )
 if not exist "D:\yoloTrain\custom_data\labels" (
-    echo [ERROR] custom_data\labels not found after extraction. Training aborted.
-    goto :FAIL
-)
-if not exist "D:\yoloTrain\custom_data\classes.txt" (
-    echo [ERROR] custom_data\classes.txt not found after extraction. Training aborted.
+    echo [ERROR] custom_data\labels not found. Training aborted.
     goto :FAIL
 )
 
-echo.
 echo ==========================================
 echo 4. Activating Python Virtual Environment...
 echo ==========================================
