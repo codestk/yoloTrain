@@ -9,9 +9,9 @@ title Automatic Full YOLO Workflow
 echo [Step 4/4] Verifying and copying model...
 @echo off
  
-set "src=C:\yoloTrain\runs\detect\train\weights\best.pt"
-set "dst1=D:\docker\LM-Backend\label-studio-ml-backend\label_studio_ml\examples\yolo\modelsbest.pt"
-set "dst2=D:\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
+set "src=D:\yoloTrain\runs\detect\train\weights\best.pt"
+set "dst1=D:\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
+set "dst2=D:\docker\LM-Backend-Git\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
 
 if exist "%src%" (
     copy /Y "%src%" "%dst1%"
