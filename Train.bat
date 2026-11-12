@@ -50,7 +50,7 @@ if errorlevel 1 (
 )
 echo Data preparation complete.
 echo.
-timeout /t 20 > nul
+timeout /t 20 > nul 2>&1
 
 REM =================================================================
 REM  [Step 3] เริ่มเทรนโมเดล
@@ -75,7 +75,7 @@ rem yolo detect train data=data.yaml model=yolov8m.pt imgsz=640 epochs=150 patie
 
 echo.
 echo Model training process finished.
-timeout /t 15 > nul
+timeout /t 15 > nul 2>&1
 
 :COPY_CHECK
 echo [Step 4/4] Comparing with champion and deploying only if better...

@@ -22,7 +22,7 @@ if /i not "%~1"=="__logged" (
     set "RUNLOG=%ROOT%\logs\run_!TS!.log"
     set "SELF=%~f0"
     echo Log file: !RUNLOG!
-    powershell -NoProfile -Command "[Console]::OutputEncoding=[Text.Encoding]::UTF8; & cmd.exe /d /c ('\"' + $env:SELF + '\" __logged 2>&1') | Tee-Object -FilePath $env:RUNLOG; exit $LASTEXITCODE"
+    powershell -NoProfile -Command "[Console]::OutputEncoding=[Text.Encoding]::UTF8; $w=New-Object IO.StreamWriter($env:RUNLOG,$false,(New-Object Text.UTF8Encoding($true))); & cmd.exe /d /c ('\"' + $env:SELF + '\" __logged 2>&1') | ForEach-Object { Write-Host $_; $l=($_ -replace '\x1b\[[0-9;?]*[A-Za-z]',''); if (($l -notmatch '[\u2500\u2501\u2578\u257a]') -or ($l -match '100%%')) { $w.WriteLine($l); $w.Flush() } }; $rc=$LASTEXITCODE; $w.Close(); exit $rc"
     set "RC=!errorlevel!"
     echo.
     if "!RC!"=="0" (echo RESULT: SUCCESS) else (echo RESULT: FAILED  ^(exit code !RC!^) - see !RUNLOG!)
@@ -71,9 +71,21 @@ call :log "Docker container: running"
 rem ----------------------------------------------------------------------
 set "STEP=1 - clear custom_data"
 call :log "[STEP %STEP%]"
-if exist "%ROOT%\custom_data" rmdir /s /q "%ROOT%\custom_data"
-mkdir "%ROOT%\custom_data"
-if errorlevel 1 (set "WHY=could not recreate %ROOT%\custom_data" & goto :FAIL)
+rem custom_data is mounted into Docker as /yolo_export, so keep the folder and only empty it
+if not exist "%ROOT%\custom_data" mkdir "%ROOT%\custom_data"
+attrib -r -s -h "%ROOT%\custom_data\*" /s /d >nul 2>&1
+del /f /q "%ROOT%\custom_data\*" >nul 2>&1
+for /d %%d in ("%ROOT%\custom_data\*") do rmdir /s /q "%%d"
+set "LEFT="
+for /f "delims=" %%x in ('dir /b "%ROOT%\custom_data" 2^>nul') do set "LEFT=!LEFT! %%x"
+if defined LEFT (
+    call :log "WARNING: could not delete everything in custom_data:!LEFT!"
+    call :log "         (close File Explorer / VS Code windows that show this folder)"
+)
+rem Only these would break the run; anything else left over (e.g. an old temp folder) is ignored
+for %%x in (images labels) do if exist "%ROOT%\custom_data\%%x" (set "WHY=old custom_data\%%x could not be deleted - close programs using it, then run again" & goto :FAIL)
+if exist "%ROOT%\custom_data\*.json" (set "WHY=old JSON in custom_data could not be deleted - close programs using it, then run again" & goto :FAIL)
+call :log "custom_data emptied"
 
 rem ----------------------------------------------------------------------
 set "STEP=2 - export JSON from Label Studio"
