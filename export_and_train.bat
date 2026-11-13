@@ -147,6 +147,21 @@ if exist "%ROOT%\champion\history.csv" (
     powershell -NoProfile -Command "Get-Content '%ROOT%\champion\history.csv' -Tail 3"
 )
 
+rem ----------------------------------------------------------------------
+set "STEP=6 - label audit with the champion model"
+call :log "[STEP %STEP%]  started %time%"
+set "AUDIT_MODEL=%ROOT%\champion\best.pt"
+if not exist "!AUDIT_MODEL!" set "AUDIT_MODEL=%ROOT%\runs\detect\!LASTRUN!\weights\best.pt"
+call :log "Audit model: !AUDIT_MODEL!"
+"%PY%" rice_label_audit_v2_project9.py --data "%ROOT%\custom_data" --model "!AUDIT_MODEL!" --tasks-json "!EXPORT_JSON!" --output "%ROOT%\rice_audit_v2_output"
+set "RC=!errorlevel!"
+if "!RC!"=="0" (
+    call :log "Label audit finished: %ROOT%\rice_audit_v2_output"
+) else (
+    rem The audit is a helper report: a failure here does not undo the training result
+    call :log "WARNING: label audit failed (exit code !RC!) - training result is still valid"
+)
+
 call :log "===== SUCCESS  %date% %time% ====="
 exit /b 0
 

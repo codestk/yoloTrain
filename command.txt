@@ -47,4 +47,8 @@ python rice_label_audit_v2.py --data "D:\yoloTrain\custom_data" --model "D:\yolo
 
 
 
-python rice_label_audit_v2_project9.py --data "D:\yoloTrain\custom_data" --model "D:\yoloTrain\runs\detect\train\weights\best.pt" --output "D:\yoloTrain\rice_audit_v2_output"
+$json = (Get-ChildItem D:\yoloTrain\custom_data\*.json | Sort-Object LastWriteTime -Descending | Select-Object -First 1).FullName
+.\venv\Scripts\python.exe rice_label_audit_v2_project9.py --data "D:\yoloTrain\custom_data" --model "D:\yoloTrain\champion\best.pt" --tasks-json $json --output "D:\yoloTrain\rice_audit_v2_output"
+
+
+.\venv\Scripts\python.exe compare_and_deploy.py --new runs\detect\m640_20261112_1627\weights\best.pt --dest "D:\docker\LM-Backend\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt" --dest "d:\rice_anomaly_detection_PyTorch\models\yolo\best.pt" --dest "D:\docker\LM-Backend-Git\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
