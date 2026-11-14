@@ -97,7 +97,7 @@ const el=id=>document.getElementById(id);const esc=s=>String(s??'').replace(/[&<
 function key(r){return [r.image,r.issue,r.reason,r.box_xyxy].join('|')};function persist(){localStorage.setItem(storageKey,JSON.stringify(saved))}
 function render(){let q=el('q').value.toLowerCase(),p=el('priority').value,s=el('status').value;let filtered=rows.filter(r=>(!p||r.priority===p)&&(!s||(s==='done'===!!saved[key(r)]))&&(!q||[r.image,r.issue,r.reason].join(' ').toLowerCase().includes(q)));
 el('stats').textContent=`ทั้งหมด ${rows.length} รายการ | ตรวจแล้ว ${rows.filter(r=>saved[key(r)]).length} | แสดง ${filtered.length}`;
-el('body').innerHTML=filtered.map(r=>`<tr class="${saved[key(r)]?'done':''}"><td><input type="checkbox" data-key="${esc(key(r))}" ${saved[key(r)]?'checked':''}></td><td class="${esc(r.priority)}">${esc(r.priority)}</td><td>${esc(r.score)}</td><td class="filename">${esc(r.image)}</td><td class="reason"><span class="pill">${esc(r.issue)}</span><div>${esc(r.reason)}</div></td><td>${r.task_url?`<a href="${esc(r.task_url)}" target="_blank" rel="noopener">Open Task ↗</a>`:'ไม่มี Task ID'}</td></tr>`).join('');
+el('body').innerHTML=filtered.map(r=>`<tr class="${saved[key(r)]?'done':''}"><td><input type="checkbox" data-key="${esc(key(r))}" ${saved[key(r)]?'checked':''}></td><td class="${esc(r.priority)}">${esc(r.priority)}</td><td>${esc(r.score)}</td><td class="filename">${esc(r.image)}</td><td class="reason"><span class="pill">${esc(r.issue)}</span><div>${esc(r.reason)}</div></td><td>${r.task_url?`<a href="${esc(r.task_url)}" target="_blank" rel="noopener" data-key="${esc(key(r))}">Open Task ↗</a>`:'ไม่มี Task ID'}</td></tr>`).join('');
 el('body').querySelectorAll('input[type=checkbox]').forEach(c=>c.addEventListener('change',()=>{
 const r=rows.find(r=>key(r)===c.dataset.key);
 if(c.checked && r && r.task_url){
@@ -105,6 +105,10 @@ if(c.checked && r && r.task_url){
   window.open(r.task_url,'_blank','noopener');
 }
 saved[c.dataset.key]=c.checked;persist();render()
+}));
+el('body').querySelectorAll('a[data-key]').forEach(a=>a.addEventListener('click',()=>{
+  // Clicking Open Task also marks the row as reviewed (the link opens the task itself).
+  saved[a.dataset.key]=true;persist();setTimeout(render,0)
 }))}
 ['q','priority','status'].forEach(id=>el(id).addEventListener('input',render));el('reset').onclick=()=>{if(confirm('ล้างสถานะตรวจแล้วทั้งหมด?')){saved={};persist();render()}};
 el('export').onclick=()=>{let lines=['image,issue,reason,reviewed'];for(let r of rows){let vals=[r.image,r.issue,r.reason,saved[key(r)]?'yes':'no'];lines.push(vals.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(','))}let blob=new Blob(['\\ufeff'+lines.join('\\r\\n')],{type:'text/csv;charset=utf-8'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='review_status.csv';a.click();URL.revokeObjectURL(a.href)};render();</script></html>'''
