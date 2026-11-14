@@ -34,7 +34,7 @@ echo.
 echo [Step 1/4] Keeping old runs (no cleanup). data\train and data\validation are rebuilt in step 2.
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmm"') do set "TS=%%i"
 rem ---- Model settings: change only these two lines to switch model / image size ----
-set "MODEL=yolov8s"
+set "MODEL=yolo26s"
 set "IMGSZ=640"
 set "RUN=%MODEL%_%IMGSZ%_%TS%"
 rem Remember the run name so export_and_train.bat can find it
@@ -94,7 +94,14 @@ if not exist "%src%" (
     echo [!] Error: source file not found: %src%
     goto :END
 )
-"%VENV_PYTHON%" compare_and_deploy.py --imgsz %IMGSZ% --new "%src%" --dest "%dst1%" --dest "%dst2%" --dest "%dst3%"
+REM YOLO26 needs ultralytics 8.4+. The rice app (8.3.225) and the Label Studio ML backends
+REM may not load it yet, so for yolo26 models only compare - do not copy to the apps.
+set "DEPLOY_ARGS=--dest "%dst1%" --dest "%dst2%" --dest "%dst3%""
+if /i "%MODEL:~0,6%"=="yolo26" (
+    set "DEPLOY_ARGS="
+    echo [i] %MODEL%: compare only. Not copied to rice app / Label Studio - upgrade ultralytics there first.
+)
+"%VENV_PYTHON%" compare_and_deploy.py --imgsz %IMGSZ% --new "%src%" %DEPLOY_ARGS%
 
 
 :END
