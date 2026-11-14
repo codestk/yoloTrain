@@ -133,13 +133,15 @@ rem ----------------------------------------------------------------------
 set "STEP=4-5 - split + train + compare (Train.bat)"
 call :log "[STEP %STEP%]  started %time%"
 call "%ROOT%\venv\Scripts\activate.bat"
+if exist "%ROOT%\last_run.txt" del /f /q "%ROOT%\last_run.txt"
 call "%ROOT%\Train.bat" < nul
 set "RC=!errorlevel!"
 call :log "Train.bat finished %time%, exit code: !RC!"
 
 set "LASTRUN="
-for /f "delims=" %%d in ('dir /b /ad /o-d "%ROOT%\runs\detect\m640_*" 2^>nul') do if not defined LASTRUN set "LASTRUN=%%d"
-if not defined LASTRUN (set "WHY=no runs\detect\m640_* folder was created - training did not start, see Train.bat output above" & goto :FAIL)
+if exist "%ROOT%\last_run.txt" set /p LASTRUN=<"%ROOT%\last_run.txt"
+if not defined LASTRUN (set "WHY=last_run.txt not found - Train.bat did not start training, see its output above" & goto :FAIL)
+if not exist "%ROOT%\runs\detect\!LASTRUN!" (set "WHY=runs\detect\!LASTRUN! was not created - training did not start, see Train.bat output above" & goto :FAIL)
 if not exist "%ROOT%\runs\detect\!LASTRUN!\weights\best.pt" (set "WHY=training of !LASTRUN! did not produce best.pt - see the training output above" & goto :FAIL)
 call :log "Last run: !LASTRUN!"
 if exist "%ROOT%\champion\history.csv" (

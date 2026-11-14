@@ -33,7 +33,12 @@ echo.
 
 echo [Step 1/4] Keeping old runs (no cleanup). data\train and data\validation are rebuilt in step 2.
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmm"') do set "TS=%%i"
-set "RUN=m640_%TS%"
+rem ---- Model settings: change only these two lines to switch model / image size ----
+set "MODEL=yolov8s"
+set "IMGSZ=640"
+set "RUN=%MODEL%_%IMGSZ%_%TS%"
+rem Remember the run name so export_and_train.bat can find it
+> "%~dp0last_run.txt" echo %RUN%
 echo Run name: %RUN%
 echo.
 
@@ -55,7 +60,7 @@ timeout /t 20 > nul 2>&1
 REM =================================================================
 REM  [Step 3] เริ่มเทรนโมเดล
 REM =================================================================
-echo [ขั้นตอนที่ 3/4] กำลังเริ่มการฝึกสอนโมเดล YOLOv8m...
+echo [ขั้นตอนที่ 3/4] กำลังเริ่มการฝึกสอนโมเดล %MODEL% ...
 REM คำสั่งเทรนที่คุณเลือกใช้
 REM yolo detect train data=data.yaml model=yolov8s.pt epochs=180 imgsz=640   device=0 workers=2
 rem yolo detect train data=data.yaml model=yolov8s.pt epochs=60 imgsz=640   device=0  
@@ -71,7 +76,7 @@ rem yolo detect train data=data.yaml model=yolov8m.pt imgsz=640 epochs=150 patie
  
 rem Best command for training YOLOv8m with specific parameters:
 rem yolo detect train data=data.yaml model=yolov8m.pt imgsz=640 epochs=150 patience=40 batch=12 workers=4 device=0 cos_lr=True close_mosaic=70 flipud=0.5 fliplr=0.5 seed=0 name=train_m640_close70
-"%VENV_YOLO%" detect train data=data.yaml model=yolov8s.pt imgsz=640 epochs=150 patience=40 batch=12 workers=4 device=0 cos_lr=True close_mosaic=70 flipud=0.5 fliplr=0.5 seed=0 name=%RUN%
+"%VENV_YOLO%" detect train data=data.yaml model=%MODEL%.pt imgsz=%IMGSZ% epochs=150 patience=40 batch=12 workers=4 device=0 cos_lr=True close_mosaic=70 flipud=0.5 fliplr=0.5 seed=0 name=%RUN%
 
 echo.
 echo Model training process finished.
@@ -89,7 +94,7 @@ if not exist "%src%" (
     echo [!] Error: source file not found: %src%
     goto :END
 )
-"%VENV_PYTHON%" compare_and_deploy.py --new "%src%" --dest "%dst1%" --dest "%dst2%" --dest "%dst3%"
+"%VENV_PYTHON%" compare_and_deploy.py --imgsz %IMGSZ% --new "%src%" --dest "%dst1%" --dest "%dst2%" --dest "%dst3%"
 
 
 :END
