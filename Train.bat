@@ -34,7 +34,7 @@ echo.
 echo [Step 1/4] Keeping old runs (no cleanup). data\train and data\validation are rebuilt in step 2.
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmm"') do set "TS=%%i"
 rem ---- Model settings: change only these two lines to switch model / image size ----
-set "MODEL=yolo26s"
+set "MODEL=yolov8m"
 set "IMGSZ=640"
 set "RUN=%MODEL%_%IMGSZ%_%TS%"
 rem Remember the run name so export_and_train.bat can find it
