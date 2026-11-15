@@ -1,13 +1,13 @@
 {
-  "images": 6439,
+  "images": 6434,
   "classes": 25,
-  "issues": 241,
+  "issues": 342,
   "issues_by_type": {
-    "class_disagreement": 15,
-    "human_box_not_matched": 122,
-    "possible_missing_annotation": 104
+    "class_disagreement": 13,
+    "possible_missing_annotation": 204,
+    "human_box_not_matched": 125
   },
-  "tasks_mapped": 6003,
+  "tasks_mapped": 5998,
   "ambiguous_task_matches": 436,
   "warning": "Model disagreement is not proof of incorrect human annotation. Do not change labels just to reach zero alerts."
 }
