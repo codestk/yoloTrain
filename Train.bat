@@ -106,7 +106,7 @@ timeout /t 15 > nul 2>&1
 echo [Step 4/4] Comparing with champion and deploying only if better...
 
 set "src=D:\yoloTrain\runs\detect\%RUN%\weights\best.pt"
-set "dst1=D:\docker\LM-Backend\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
+rem dst1 (D:\docker\LM-Backend\...) no longer exists; the Label Studio ML backend is LM-Backend-Git (dst3)
 set "dst2=d:\rice_anomaly_detection_PyTorch\models\yolo\best.pt"
 set "dst3=D:\docker\LM-Backend-Git\label-studio-ml-backend\label_studio_ml\examples\yolo\models\best.pt"
 
@@ -117,7 +117,7 @@ if not exist "%src%" (
 )
 REM YOLO26 needs ultralytics 8.4+. The rice app (8.3.225) and the Label Studio ML backends
 REM may not load it yet, so for yolo26 models only compare - do not copy to the apps.
-set "DEPLOY_ARGS=--dest "%dst1%" --dest "%dst2%" --dest "%dst3%""
+set "DEPLOY_ARGS=--dest "%dst2%" --dest "%dst3%""
 if /i "%MODEL:~0,6%"=="yolo26" (
     set "DEPLOY_ARGS="
     echo [i] %MODEL%: compare only. Not copied to rice app / Label Studio - upgrade ultralytics there first.
