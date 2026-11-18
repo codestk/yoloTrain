@@ -25,7 +25,7 @@ if /i not "%~1"=="__logged" (
     powershell -NoProfile -Command "[Console]::OutputEncoding=[Text.Encoding]::UTF8; $w=New-Object IO.StreamWriter($env:RUNLOG,$false,(New-Object Text.UTF8Encoding($true))); & cmd.exe /d /c ('\"' + $env:SELF + '\" __logged 2>&1') | ForEach-Object { Write-Host $_; $l=($_ -replace '\x1b\[[0-9;?]*[A-Za-z]',''); if (($l -notmatch '[\u2500\u2501\u2578\u257a]') -or ($l -match '100%%')) { $w.WriteLine($l); $w.Flush() } }; $rc=$LASTEXITCODE; $w.Close(); exit $rc"
     set "RC=!errorlevel!"
     echo.
-    if "!RC!"=="0" (echo RESULT: SUCCESS) else (echo RESULT: FAILED  ^(exit code !RC!^) - see !RUNLOG!)
+    if "!RC!"=="0" (echo RESULT: SUCCESS) else if "!RC!"=="2" (echo RESULT: COMPLETED WITH DEPLOYMENT WARNINGS - see !RUNLOG!) else (echo RESULT: FAILED ^(exit code !RC!^) - see !RUNLOG!)
     set "SHUTDOWN_NOW=0"
     if "%DO_SHUTDOWN%"=="1" if "!RC!"=="0" set "SHUTDOWN_NOW=1"
     if "!SHUTDOWN_NOW!"=="1" (
@@ -52,7 +52,7 @@ if not exist "%PY%" (set "WHY=venv python not found: %PY%" & goto :FAIL)
 if errorlevel 1 (set "WHY=python packages ultralytics/torch not working" & goto :FAIL)
 nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader 2>nul
 
-for %%f in (ls_json_to_yolo.py train_val_split.py compare_and_deploy.py Train.bat classes.txt dataYaml.py) do (
+for %%f in (ls_json_to_yolo.py train_val_split.py compare_and_deploy.py snapshot_validation.py Train.bat classes.txt dataYaml.py) do (
     if not exist "%ROOT%\%%f" (set "WHY=missing file %ROOT%\%%f" & goto :FAIL)
 )
 call :log "Scripts present: OK"
@@ -139,7 +139,9 @@ if exist "%ROOT%\last_run.txt" del /f /q "%ROOT%\last_run.txt"
 call "%ROOT%\Train.bat" --noninteractive < nul
 set "RC=!errorlevel!"
 call :log "Train.bat finished %time%, exit code: !RC!"
-if not "!RC!"=="0" (set "WHY=training, comparison or deployment failed (exit code !RC!)" & goto :FAIL)
+set "WORKFLOW_RC=!RC!"
+if "!RC!"=="2" call :log "WARNING: deployment incomplete; comparison succeeded. Continuing audit."
+if not "!RC!"=="0" if not "!RC!"=="2" (set "WHY=training or comparison failed (exit code !RC!)" & goto :FAIL)
 
 set "LASTRUN="
 if exist "%ROOT%\last_run.txt" set /p LASTRUN=<"%ROOT%\last_run.txt"
@@ -153,20 +155,23 @@ if exist "%ROOT%\champion\history.csv" (
 )
 
 rem ----------------------------------------------------------------------
-set "STEP=6 - label audit with the champion model"
+set "STEP=6 - label audit (latest model, validation format checks only)"
 call :log "[STEP %STEP%]  started %time%"
-set "AUDIT_MODEL=%ROOT%\champion\best.pt"
-if not exist "!AUDIT_MODEL!" set "AUDIT_MODEL=%ROOT%\runs\detect\!LASTRUN!\weights\best.pt"
+set "AUDIT_MODEL=%ROOT%\runs\detect\!LASTRUN!\weights\best.pt"
 call :log "Audit model: !AUDIT_MODEL!"
-"%PY%" rice_label_audit_v2_project9.py --data "%ROOT%\custom_data" --model "!AUDIT_MODEL!" --tasks-json "!EXPORT_JSON!" --output "%ROOT%\rice_audit_v2_output"
+"%PY%" rice_label_audit_v2_project9.py --data "%ROOT%\custom_data" --model "!AUDIT_MODEL!" --tasks-json "!EXPORT_JSON!" --val-manifest "%ROOT%\val_split.txt" --output "%ROOT%\rice_audit_v2_output\!LASTRUN!"
 set "RC=!errorlevel!"
 if "!RC!"=="0" (
-    call :log "Label audit finished: %ROOT%\rice_audit_v2_output"
+    call :log "Label audit finished: %ROOT%\rice_audit_v2_output\!LASTRUN!"
 ) else (
     rem The audit is a helper report: a failure here does not undo the training result
     call :log "WARNING: label audit failed (exit code !RC!) - training result is still valid"
 )
 
+if "!WORKFLOW_RC!"=="2" (
+    call :log "===== COMPLETED WITH DEPLOYMENT WARNINGS ====="
+    exit /b 2
+)
 call :log "===== SUCCESS  %date% %time% ====="
 exit /b 0
 

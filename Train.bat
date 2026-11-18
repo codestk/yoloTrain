@@ -62,6 +62,12 @@ if errorlevel 1 (
     set "EXIT_CODE=1"
     goto :END
 )
+"%VENV_PYTHON%" snapshot_validation.py --output "validation_history\%RUN%"
+if errorlevel 1 (
+    echo [ERROR] Validation snapshot failed.
+    set "EXIT_CODE=1"
+    goto :END
+)
 echo Data preparation complete.
 echo.
 timeout /t 20 > nul 2>&1
@@ -116,9 +122,15 @@ if /i "%MODEL:~0,6%"=="yolo26" (
     set "DEPLOY_ARGS="
     echo [i] %MODEL%: compare only. Not copied to rice app / Label Studio - upgrade ultralytics there first.
 )
-"%VENV_PYTHON%" compare_and_deploy.py --imgsz %IMGSZ% --new "%src%" --min_gain %MIN_GAIN% %CLASS_GUARD_ARGS% %DEPLOY_ARGS%
-if errorlevel 1 (
-    echo [ERROR] Champion comparison or deployment failed.
+"%VENV_PYTHON%" compare_and_deploy.py --imgsz %IMGSZ% --new "%src%" --snapshot "validation_history\%RUN%\manifest.json" --min_gain %MIN_GAIN% %CLASS_GUARD_ARGS% %DEPLOY_ARGS%
+set "COMPARE_RC=!errorlevel!"
+if "!COMPARE_RC!"=="3" (
+    echo [WARNING] Comparison succeeded, but some deployments failed. See comparison JSON.
+    set "EXIT_CODE=2"
+    goto :END
+)
+if not "!COMPARE_RC!"=="0" (
+    echo [ERROR] Champion comparison failed.
     set "EXIT_CODE=1"
     goto :END
 )

@@ -13,7 +13,7 @@ from pathlib import Path
 from urllib.parse import quote, unquote, urlparse
 
 IMAGE_EXT={'.jpg','.jpeg','.png','.bmp','.webp','.tif','.tiff'}
-FIELDS=['priority','score','image','label','issue','reason','task_id','task_url','box_xyxy','confidence']
+FIELDS=['split','priority','score','image','label','issue','reason','task_id','task_url','box_xyxy','confidence']
 
 def get_images(root):
     p=root/'images'
@@ -89,15 +89,15 @@ def make_html(rows, out):
     doc='''<!doctype html><html lang="th"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rice Label Audit v2</title>
 <style>body{font:15px system-ui,sans-serif;margin:22px;background:#f5f7fa;color:#17212d}h1{margin-bottom:4px}.sub{color:#5b6471}input,select,button{padding:9px;border:1px solid #bbc3ce;border-radius:7px;background:white}button{cursor:pointer}.controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.stats{font-weight:600;margin:12px 0}table{width:100%;border-collapse:collapse;background:white}th,td{border-bottom:1px solid #e5e7eb;padding:9px;text-align:left;vertical-align:top}th{position:sticky;top:0;background:#e9edf3}td.filename{max-width:280px;overflow-wrap:anywhere}td.reason{max-width:360px;overflow-wrap:anywhere}.high{color:#b42318;font-weight:700}.medium{color:#a15c00}.low{color:#475467}.done{background:#c8f7d4!important;color:#14532d}.done td{background:#c8f7d4!important}.done:hover td{background:#a9eebe!important}a{color:#1266b4}.pill{padding:3px 7px;border-radius:8px;background:#edf2fa}.note{padding:10px;background:#fff8e7;border-radius:7px;margin:10px 0}</style>
 <h1>Rice Label Audit — Review Queue</h1><div class="sub">ติ๊กช่องตรวจแล้ว → ไฮไลต์สีเขียวและเปิด Task ใน Label Studio ทันที (เปิดแท็บใหม่)</div>
-<div class="note">คะแนนเป็นลำดับความสำคัญในการตรวจ ไม่ใช่เปอร์เซ็นต์ความผิดพลาด หากไม่มีลิงก์ Task ให้ Export JSON จาก Label Studio แล้วรันสคริปต์ด้วย --tasks-json</div>
+<div class="note">Validation ตรวจเฉพาะรูปแบบ Label ไม่ใช้ AI เสนอแก้ Label; การแก้ต้องอ้างอิงภาพและกติกาการติดป้าย ไม่ใช่ทำให้ตรงคำทำนาย การเปิด Task ยังไม่นับว่าตรวจเสร็จ<br>คะแนนเป็นลำดับความสำคัญในการตรวจ ไม่ใช่เปอร์เซ็นต์ความผิดพลาด หากไม่มีลิงก์ Task ให้ Export JSON จาก Label Studio แล้วรันสคริปต์ด้วย --tasks-json</div>
 <div class="controls"><input id="q" placeholder="ค้นหาชื่อภาพ / class / issue" style="min-width:270px"><select id="priority"><option value="">ทุกระดับ</option><option>high</option><option>medium</option><option>low</option></select><select id="status"><option value="">ทุกสถานะ</option><option value="todo">ยังไม่ตรวจ</option><option value="done">ตรวจแล้ว</option></select><button id="export">Export สถานะ CSV</button><button id="reset">ล้างสถานะทั้งหมด</button></div>
-<div class="stats" id="stats"></div><div style="overflow:auto"><table><thead><tr><th>ตรวจแล้ว</th><th>Priority</th><th>Score</th><th>Image</th><th>Issue / Reason</th><th>Task</th></tr></thead><tbody id="body"></tbody></table></div>
+<div class="stats" id="stats"></div><div style="overflow:auto"><table><thead><tr><th>ตรวจแล้ว</th><th>Priority</th><th>Score</th><th>Split</th><th>Image</th><th>Issue / Reason</th><th>Task</th></tr></thead><tbody id="body"></tbody></table></div>
 <script>const rows=__DATA__;const storageKey='rice-audit-v2:'+location.pathname;let saved={};try{saved=JSON.parse(localStorage.getItem(storageKey)||'{}')}catch(e){};
 const el=id=>document.getElementById(id);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function key(r){return [r.image,r.issue,r.reason,r.box_xyxy].join('|')};function persist(){localStorage.setItem(storageKey,JSON.stringify(saved))}
 function render(){let q=el('q').value.toLowerCase(),p=el('priority').value,s=el('status').value;let filtered=rows.filter(r=>(!p||r.priority===p)&&(!s||(s==='done'===!!saved[key(r)]))&&(!q||[r.image,r.issue,r.reason].join(' ').toLowerCase().includes(q)));
 el('stats').textContent=`ทั้งหมด ${rows.length} รายการ | ตรวจแล้ว ${rows.filter(r=>saved[key(r)]).length} | แสดง ${filtered.length}`;
-el('body').innerHTML=filtered.map(r=>`<tr class="${saved[key(r)]?'done':''}"><td><input type="checkbox" data-key="${esc(key(r))}" ${saved[key(r)]?'checked':''}></td><td class="${esc(r.priority)}">${esc(r.priority)}</td><td>${esc(r.score)}</td><td class="filename">${esc(r.image)}</td><td class="reason"><span class="pill">${esc(r.issue)}</span><div>${esc(r.reason)}</div></td><td>${r.task_url?`<a href="${esc(r.task_url)}" target="_blank" rel="noopener" data-key="${esc(key(r))}">Open Task ↗</a>`:'ไม่มี Task ID'}</td></tr>`).join('');
+el('body').innerHTML=filtered.map(r=>`<tr class="${saved[key(r)]?'done':''}"><td><input type="checkbox" data-key="${esc(key(r))}" ${saved[key(r)]?'checked':''}></td><td class="${esc(r.priority)}">${esc(r.priority)}</td><td>${esc(r.score)}</td><td>${esc(r.split)}</td><td class="filename">${esc(r.image)}</td><td class="reason"><span class="pill">${esc(r.issue)}</span><div>${esc(r.reason)}</div></td><td>${r.task_url?`<a href="${esc(r.task_url)}" target="_blank" rel="noopener" data-key="${esc(key(r))}">Open Task ↗</a>`:'ไม่มี Task ID'}</td></tr>`).join('');
 el('body').querySelectorAll('input[type=checkbox]').forEach(c=>c.addEventListener('change',()=>{
 const r=rows.find(r=>key(r)===c.dataset.key);
 if(c.checked && r && r.task_url){
@@ -107,8 +107,8 @@ if(c.checked && r && r.task_url){
 saved[c.dataset.key]=c.checked;persist();render()
 }));
 el('body').querySelectorAll('a[data-key]').forEach(a=>a.addEventListener('click',()=>{
-  // Clicking Open Task also marks the row as reviewed (the link opens the task itself).
-  saved[a.dataset.key]=true;persist();setTimeout(render,0)
+  // Review completion requires the explicit checkbox.
+  // Opening a task does not establish that it has been reviewed.
 }))}
 ['q','priority','status'].forEach(id=>el(id).addEventListener('input',render));el('reset').onclick=()=>{if(confirm('ล้างสถานะตรวจแล้วทั้งหมด?')){saved={};persist();render()}};
 el('export').onclick=()=>{let lines=['image,issue,reason,reviewed'];for(let r of rows){let vals=[r.image,r.issue,r.reason,saved[key(r)]?'yes':'no'];lines.push(vals.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(','))}let blob=new Blob(['\\ufeff'+lines.join('\\r\\n')],{type:'text/csv;charset=utf-8'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='review_status.csv';a.click();URL.revokeObjectURL(a.href)};render();</script></html>'''
@@ -122,7 +122,9 @@ def main():
     ap.add_argument('--base-url',default='http://pc-max:8080');ap.add_argument('--project-id',type=int,default=9)
     ap.add_argument('--tasks-json',default=str(Path(__file__).resolve().parent / 'project-9.json'),help='Label Studio JSON export with task IDs (default: project-9.json next to script)')
     ap.add_argument('--output',default='rice_audit_v2_output');ap.add_argument('--device',default=None)
+    ap.add_argument('--val-manifest', help='Validation stems; validation gets format checks only, never model-driven suggestions')
     args=ap.parse_args();root=Path(args.data);out=Path(args.output).resolve();out.mkdir(parents=True,exist_ok=True)
+    val_stems=set(Path(args.val_manifest).read_text(encoding='utf-8-sig').splitlines()) if args.val_manifest else set()
     names=[s.strip() for s in (root/'classes.txt').read_text(encoding='utf-8-sig').splitlines() if s.strip()]
     images=get_images(root);tasks=parse_tasks(args.tasks_json);model=None
     if args.model:
@@ -143,10 +145,10 @@ def main():
         elif len(candidates)>1:ambiguous+=1
         url=(f'{args.base_url.rstrip("/")}/projects/{args.project_id}/data?task={quote(tid)}' if tid and args.project_id else '')
         def add(priority,score,issue,reason,xy='',confidence=''):
-            issues.append(dict(priority=priority,score=round(score,2),image=img.name,label=lab.name,issue=issue,reason=reason,task_id=tid,task_url=url,box_xyxy=xy,confidence=confidence))
+            issues.append(dict(split=('validation' if img.stem in val_stems else 'train' if args.val_manifest else 'unknown'),priority=priority,score=round(score,2),image=img.name,label=lab.name,issue=issue,reason=reason,task_id=tid,task_url=url,box_xyxy=xy,confidence=confidence))
             type_counts[issue]+=1
         for e in errors:add('high',100,'invalid_box',e)
-        if model:
+        if model and img.stem not in val_stems:
             from PIL import Image
             with Image.open(img) as im:w,h=im.size
             pred=model.predict(source=str(img),imgsz=args.imgsz,conf=args.conf,verbose=False,device=args.device)[0]
@@ -171,8 +173,10 @@ def main():
         if idx%100==0 or idx==len(images):print(f'Checked {idx}/{len(images)}',flush=True)
     issues.sort(key=lambda r:(-float(r['score']),r['image']))
     csv_write(out/'review_queue.csv',issues,FIELDS)
+    for split in ('train', 'validation', 'unknown'):
+        csv_write(out/f'review_{split}.csv',[r for r in issues if r['split']==split],FIELDS)
     csv_write(out/'class_counts.csv',[{'class':name,'count':counts[name]} for name in names],['class','count'])
-    summary={'images':len(images),'classes':len(names),'issues':len(issues),'issues_by_type':dict(type_counts),'tasks_mapped':mapped,'ambiguous_task_matches':ambiguous,'warning':'Model disagreement is not proof of incorrect human annotation. Do not change labels just to reach zero alerts.'}
+    summary={'audit_model':args.model,'val_manifest':args.val_manifest,'validation_policy':'format_only' if args.val_manifest else 'split_unknown','images':len(images),'classes':len(names),'issues':len(issues),'issues_by_type':dict(type_counts),'tasks_mapped':mapped,'ambiguous_task_matches':ambiguous,'warning':'Model disagreement is not proof of incorrect human annotation. Do not change labels just to reach zero alerts.'}
     (out/'summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
     make_html(issues,out)
     print('Finished:',out);print(json.dumps(summary,ensure_ascii=False,indent=2))

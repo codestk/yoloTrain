@@ -33,20 +33,18 @@ def main():
                         help='New model must beat the champion mAP50-95 by more than this')
     parser.add_argument('--max_class_drop', type=float, default=None,
                         help='Optional maximum absolute per-class AP50-95 drop; checks all represented classes')
+    parser.add_argument('--snapshot', help='Validation snapshot manifest for this run')
     parser.add_argument('--dest', action='append', default=[], help='Where to copy the winning model')
     args = parser.parse_args()
     if not math.isfinite(args.min_gain) or args.min_gain < 0:
         parser.error('--min_gain must be finite and nonnegative')
     if args.max_class_drop is not None and (not math.isfinite(args.max_class_drop) or not 0 <= args.max_class_drop <= 1):
         parser.error('--max_class_drop must be between 0 and 1')
-    for dst in args.dest:
-        if not os.path.isdir(os.path.dirname(dst) or '.'):
-            raise FileNotFoundError(f'Deployment folder not found: {dst}')
     evaluations = {}
     model_names = {}
 
 
-    ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+    ts = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
     champ_dir = os.path.dirname(args.champion) or '.'
     hist_dir = os.path.join(champ_dir, 'history')
     os.makedirs(hist_dir, exist_ok=True)
@@ -68,15 +66,26 @@ def main():
 
 
     def deploy(src):
+        results = []
         for dst in args.dest:
-            d = os.path.dirname(dst)
-            if d and not os.path.isdir(d):
-                print(f'  [skip] folder not found: {d}')
-                continue
-            if os.path.exists(dst):
-                shutil.copy2(dst, dst + f'.bak_{ts}')
-            shutil.copy2(src, dst)
-            print(f'  [OK] copied to {dst}')
+            try:
+                if not os.path.isdir(os.path.dirname(dst) or '.'):
+                    raise FileNotFoundError(f'Destination folder missing: {dst}')
+                if os.path.exists(dst):
+                    shutil.copy2(dst, dst + f'.bak_{ts}')
+                temporary = dst + f'.tmp_{ts}'
+                try:
+                    shutil.copy2(src, temporary)
+                    os.replace(temporary, dst)
+                finally:
+                    if os.path.exists(temporary):
+                        os.remove(temporary)
+                results.append(dict(destination=dst, status='copied'))
+                print(f'[DEPLOY OK] {dst}')
+            except OSError as exc:
+                results.append(dict(destination=dst, status='failed', error=str(exc)))
+                print(f'[DEPLOY WARNING] {dst}: {exc}')
+        return results
 
 
     if not os.path.exists(args.new):
@@ -107,7 +116,7 @@ def main():
         print('No champion yet -> the new model becomes the champion.')
         promote = True
 
-    report = dict(new_model=args.new, scores_new=new, scores_champion=champ if os.path.exists(args.champion) else None,
+    report = dict(validation_snapshot=args.snapshot, new_model=args.new, scores_new=new, scores_champion=champ if os.path.exists(args.champion) else None,
                   min_gain=args.min_gain, max_class_drop=args.max_class_drop,
                   class_ap=evaluations, class_names=model_names, promotion_approved=promote)
     with open(os.path.join(hist_dir, f'comparison_{ts}.json'), 'w', encoding='utf-8') as f:
@@ -125,11 +134,20 @@ def main():
             shutil.copy2(args.champion, os.path.join(hist_dir, f'best_{ts}_replaced_{champ[0]:.4f}.pt'))
         shutil.copy2(args.new, args.champion)
         print(f'[PROMOTED] New model is better. Champion updated: {args.champion}')
-        deploy(args.champion)
+        deployment = deploy(args.champion)
     else:
+        deployment = []
         print(f'[KEPT] Promotion criteria not met (new={new[0]:.4f}, champion={champ[0]:.4f}, min_gain={args.min_gain}). '
               f'Production model unchanged.')
 
+    report['deployment'] = deployment
+    report['deployment_status'] = ('partial_failure' if any(x['status'] == 'failed' for x in deployment)
+                                   else 'complete' if deployment else 'not_requested' if promote else 'not_promoted')
+    with open(os.path.join(hist_dir, f'comparison_{ts}.json'), 'w', encoding='utf-8') as f:
+        json.dump(report, f, ensure_ascii=False, indent=2, allow_nan=False)
+    if report['deployment_status'] == 'partial_failure':
+        return 3  # Training/comparison succeeded; deployment needs attention (2 is used by argparse errors).
+    return 0
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
