@@ -12,7 +12,7 @@ set "PROJECT_ID=9"
 set "LS_CONTAINER=label-studio-label-studio-1"
 set "UPLOAD_DIR=D:\docker\label-studio\media\upload\9"
 set "PY=%ROOT%\venv\Scripts\python.exe"
-rem 1 = shut the PC down at the end (also after a failure), 0 = keep it on
+rem 1 = shut down after SUCCESS only; failures keep the PC on. 0 = keep it on
 set "DO_SHUTDOWN=1"
 
 rem ---- First call: start logging, then run this same file again with output copied to the log
@@ -26,7 +26,9 @@ if /i not "%~1"=="__logged" (
     set "RC=!errorlevel!"
     echo.
     if "!RC!"=="0" (echo RESULT: SUCCESS) else (echo RESULT: FAILED  ^(exit code !RC!^) - see !RUNLOG!)
-    if "%DO_SHUTDOWN%"=="1" (
+    set "SHUTDOWN_NOW=0"
+    if "%DO_SHUTDOWN%"=="1" if "!RC!"=="0" set "SHUTDOWN_NOW=1"
+    if "!SHUTDOWN_NOW!"=="1" (
         echo System will force shutdown in 60 seconds... type: shutdown /a  to cancel
         shutdown /s /f /t 60
     ) else (
@@ -134,9 +136,10 @@ set "STEP=4-5 - split + train + compare (Train.bat)"
 call :log "[STEP %STEP%]  started %time%"
 call "%ROOT%\venv\Scripts\activate.bat"
 if exist "%ROOT%\last_run.txt" del /f /q "%ROOT%\last_run.txt"
-call "%ROOT%\Train.bat" < nul
+call "%ROOT%\Train.bat" --noninteractive < nul
 set "RC=!errorlevel!"
 call :log "Train.bat finished %time%, exit code: !RC!"
+if not "!RC!"=="0" (set "WHY=training, comparison or deployment failed (exit code !RC!)" & goto :FAIL)
 
 set "LASTRUN="
 if exist "%ROOT%\last_run.txt" set /p LASTRUN=<"%ROOT%\last_run.txt"

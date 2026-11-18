@@ -1,6 +1,7 @@
 @echo off
 chcp 65001 > nul
 setlocal enabledelayedexpansion
+set "EXIT_CODE=0"
 title Automatic Full YOLO Workflow
 
 cd /d "D:\yoloTrain"
@@ -12,6 +13,7 @@ set "VENV_YOLO=D:\yoloTrain\venv\Scripts\yolo.exe"
 
 if not exist "%VENV_PYTHON%" (
     echo [ERROR] venv python not found: "%VENV_PYTHON%"
+    set "EXIT_CODE=1"
     goto :END
 )
 
@@ -20,7 +22,8 @@ if not exist "%VENV_YOLO%" (
     "%VENV_PIP%" install ultralytics
     if not exist "%VENV_YOLO%" (
         echo [ERROR] Failed to install ultralytics/yolo in venv.
-        goto :END
+        set "EXIT_CODE=1"
+    goto :END
     )
 )
 
@@ -32,10 +35,14 @@ echo ================================================================
 echo.
 
 echo [Step 1/4] Keeping old runs (no cleanup). data\train and data\validation are rebuilt in step 2.
-for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmm"') do set "TS=%%i"
+for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set "TS=%%i"
 rem ---- Model settings: change only these two lines to switch model / image size ----
 set "MODEL=yolov8m"
 set "IMGSZ=640"
+rem Absolute mAP50-95 gain: 0.002 = 0.2 percentage points.
+set "MIN_GAIN=0.002"
+rem Optional per-class AP guard; example: --max_class_drop 0.02
+set "CLASS_GUARD_ARGS="
 set "RUN=%MODEL%_%IMGSZ%_%TS%"
 rem Remember the run name so export_and_train.bat can find it
 > "%~dp0last_run.txt" echo %RUN%
@@ -46,11 +53,13 @@ echo [Step 2/4] Preparing dataset split and YAML...
 "%VENV_PYTHON%" train_val_split.py --datapath="D:\yoloTrain\custom_data" --train_pct=.9
 if errorlevel 1 (
     echo [ERROR] train_val_split.py failed.
+    set "EXIT_CODE=1"
     goto :END
 )
 "%VENV_PYTHON%" dataYaml.py
 if errorlevel 1 (
     echo [ERROR] dataYaml.py failed.
+    set "EXIT_CODE=1"
     goto :END
 )
 echo Data preparation complete.
@@ -77,6 +86,11 @@ rem yolo detect train data=data.yaml model=yolov8m.pt imgsz=640 epochs=150 patie
 rem Best command for training YOLOv8m with specific parameters:
 rem yolo detect train data=data.yaml model=yolov8m.pt imgsz=640 epochs=150 patience=40 batch=12 workers=4 device=0 cos_lr=True close_mosaic=70 flipud=0.5 fliplr=0.5 seed=0 name=train_m640_close70
 "%VENV_YOLO%" detect train data=data.yaml model=%MODEL%.pt imgsz=%IMGSZ% epochs=150 patience=20 batch=12 workers=4 device=0 cos_lr=True close_mosaic=70 flipud=0.5 fliplr=0.5 seed=0 name=%RUN%
+if errorlevel 1 (
+    echo [ERROR] Training failed. Comparison will not run.
+    set "EXIT_CODE=1"
+    goto :END
+)
 
 echo.
 echo Model training process finished.
@@ -92,6 +106,7 @@ set "dst3=D:\docker\LM-Backend-Git\label-studio-ml-backend\label_studio_ml\examp
 
 if not exist "%src%" (
     echo [!] Error: source file not found: %src%
+    set "EXIT_CODE=1"
     goto :END
 )
 REM YOLO26 needs ultralytics 8.4+. The rice app (8.3.225) and the Label Studio ML backends
@@ -101,7 +116,12 @@ if /i "%MODEL:~0,6%"=="yolo26" (
     set "DEPLOY_ARGS="
     echo [i] %MODEL%: compare only. Not copied to rice app / Label Studio - upgrade ultralytics there first.
 )
-"%VENV_PYTHON%" compare_and_deploy.py --imgsz %IMGSZ% --new "%src%" %DEPLOY_ARGS%
+"%VENV_PYTHON%" compare_and_deploy.py --imgsz %IMGSZ% --new "%src%" --min_gain %MIN_GAIN% %CLASS_GUARD_ARGS% %DEPLOY_ARGS%
+if errorlevel 1 (
+    echo [ERROR] Champion comparison or deployment failed.
+    set "EXIT_CODE=1"
+    goto :END
+)
 
 
 :END
@@ -120,8 +140,8 @@ echo.
 powershell -Command "$s=[datetime]::Parse('%startTime%'); $e=[datetime]::Parse('%endTime%'); if ($e -lt $s) { $e = $e.AddDays(1) }; $diff=$e-$s; Write-Host ('   Total Duration : ' + $diff.ToString('hh\:mm\:ss')) -ForegroundColor Cyan"
 echo ================================================================
 echo.
-pause
-goto :EOF
+if /i not "%~1"=="--noninteractive" pause
+exit /b %EXIT_CODE%
 
 :CHECK_CUDA
 "%VENV_PYTHON%" -c "import torch,sys; sys.exit(0 if torch.cuda.is_available() else 1)"
