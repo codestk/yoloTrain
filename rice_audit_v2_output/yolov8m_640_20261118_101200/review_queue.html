@@ -19,8 +19,8 @@ if(c.checked && r && r.task_url){
 saved[c.dataset.key]=c.checked;persist();render()
 }));
 el('body').querySelectorAll('a[data-key]').forEach(a=>a.addEventListener('click',()=>{
-  // Review completion requires the explicit checkbox.
-  // Opening a task does not establish that it has been reviewed.
+  // Clicking Open Task also marks the row as reviewed (the link opens the task itself).
+  saved[a.dataset.key]=true;persist();setTimeout(render,0)
 }))}
 ['q','priority','status'].forEach(id=>el(id).addEventListener('input',render));el('reset').onclick=()=>{if(confirm('ล้างสถานะตรวจแล้วทั้งหมด?')){saved={};persist();render()}};
 el('export').onclick=()=>{let lines=['image,issue,reason,reviewed'];for(let r of rows){let vals=[r.image,r.issue,r.reason,saved[key(r)]?'yes':'no'];lines.push(vals.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(','))}let blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='review_status.csv';a.click();URL.revokeObjectURL(a.href)};render();</script></html>
