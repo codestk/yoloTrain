@@ -37,7 +37,7 @@ echo.
 echo [Step 1/4] Keeping old runs (no cleanup). data\train and data\validation are rebuilt in step 2.
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set "TS=%%i"
 rem ---- Model settings: change only these two lines to switch model / image size ----
-set "MODEL=yolov8m"
+set "MODEL=yolo26m"
 set "IMGSZ=640"
 rem Absolute mAP50-95 gain: 0.002 = 0.2 percentage points.
 set "MIN_GAIN=0.002"
