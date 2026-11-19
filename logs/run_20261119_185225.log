@@ -1,0 +1,202 @@
+﻿[Thu 11/19/2026 18:52:25] ===== START  Thu 11/19/2026 18:52:25.99 =====
+[Thu 11/19/2026 18:52:25] Computer: PC-MAX   User: momojojo   Folder: D:\yoloTrain
+[Thu 11/19/2026 18:52:26] [STEP 0 - pre-checks]
+Python 3.11.6
+ultralytics 8.4.104 | torch 2.12.0.dev20260408+cu128 | CUDA True
+NVIDIA GeForce RTX 5060, 1297 MiB, 8151 MiB
+[Thu 11/19/2026 18:52:28] Scripts present: OK
+[Thu 11/19/2026 18:52:28] Images in D:\docker\label-studio\media\upload\9: 11732
+[Thu 11/19/2026 18:52:28] Champion model: present
+[Thu 11/19/2026 18:52:28] Frozen val list: present
+label-studio-label-studio-1  Up 31 minutes
+[Thu 11/19/2026 18:52:28] Docker container: running
+[Thu 11/19/2026 18:52:28] [STEP 1 - clear custom_data]
+[Thu 11/19/2026 18:52:30] custom_data emptied
+[Thu 11/19/2026 18:52:30] [STEP 2 - export JSON from Label Studio]
+[Thu 11/19/2026 18:52:30] docker exec label-studio-label-studio-1 label-studio export 9 JSON --export-path=/yolo_export
+=> Database and media directory: /label-studio/data
+=> Static URL is set to: /static/
+=> Database and media directory: /label-studio/data
+=> Static URL is set to: /static/
+Read environment variables from: /label-studio/data/.env
+get 'SECRET_KEY' casted as '<class 'str'>' with default ''
+Starting new HTTPS connection (1): pypi.org:443
+https://pypi.org:443 "GET /pypi/label-studio/json HTTP/1.1" 200 41138
+╔════════════════════════════════╗                                              
+║Update available 1.23.0 → 1.23.2║                                              
+║Run pip install -U label-studio ║                                              
+╚════════════════════════════════╝                                              
+
+/label-studio/.venv/lib/python3.13/site-packages/django/db/backends/utils.py:98: RuntimeWarning: Accessing the database during app initialization is discouraged. To fix this warning, avoid executing queries in AppConfig.ready() or when your app modules are imported.
+  warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)
+[Thu 11/19/2026 18:53:05] docker export exit code: 0
+[Thu 11/19/2026 18:53:05] Waiting for the JSON file in D:\yoloTrain\custom_data (max 10 minutes)...
+[Thu 11/19/2026 18:53:10] JSON found after 0 s: D:\yoloTrain\custom_data\project-9-at-2026-11-19-11-53-2b18cd13.json  (12523374 bytes)
+[Thu 11/19/2026 18:53:10] [STEP 3 - build YOLO dataset from JSON + images]
+{
+  "tasks": 6433,
+  "written": 6428,
+  "background": 290,
+  "boxes": 9127,
+  "skipped_unlabeled": 2,
+  "skipped_cancelled": 3,
+  "missing_image": 0,
+  "duplicate_name": 0
+}
+Done.
+[Thu 11/19/2026 18:53:13] ls_json_to_yolo.py exit code: 0
+[Thu 11/19/2026 18:53:13] custom_data: 6428 images, 6428 label files
+[Thu 11/19/2026 18:53:13] [STEP 4-5 - split + train + compare (Train.bat)]  started 18:53:13.13
+================================================================
+  Starting Automatic Full YOLO Workflow...
+  Start Time : 18:53:13.25
+================================================================
+
+[Step 1/4] Keeping old runs (no cleanup). data\train and data\validation are rebuilt in step 2.
+Run name: yolo26m_640_20261119_185313
+
+[Step 2/4] Preparing dataset split and YAML...
+Found 6428 image files.
+Using frozen validation list val_split.txt (645 images).
+Note: 4 validation images listed in val_split.txt are no longer in custom_data.
+Train: 5787 images, Validation: 641 images.
+Data splitting process complete.
+Created config file at data.yaml
+
+File contents:
+
+Validation version: 312f9805127ec2e434342b0d7afd18199988e05e5e49ab167a42222d16c2daea; snapshot: validation_history\yolo26m_640_20261119_185313
+Data preparation complete.
+
+[ขั้นตอนที่ 3/4] กำลังเริ่มการฝึกสอนโมเดล yolo26m ...
+New https://pypi.org/project/ultralytics/8.4.215 available  Update with 'pip install -U ultralytics'
+Ultralytics 8.4.104  Python-3.11.6 torch-2.12.0.dev20260408+cu128 CUDA:0 (NVIDIA GeForce RTX 5060, 8151MiB)
+engine\trainer: agnostic_nms=False, amp=True, angle=1.0, augment=False, auto_augment=randaugment, batch=12, bgr=0.0, box=7.5, cache=False, cfg=None, classes=None, close_mosaic=70, cls=0.5, cls_pw=0.0, cls_remap=True, compile=False, conf=None, copy_paste=0.0, copy_paste_mode=flip, cos_lr=True, cutmix=0.0, data=data.yaml, degrees=0.0, deterministic=True, device=0, dfl=1.5, dgrad=0.5, dis=6.0, distill_model=None, dlam=1.0, dlog=1.0, dnn=False, dropout=0.0, dynamic=False, embed=None, end2end=None, epochs=150, erasing=0.4, exist_ok=False, fliplr=0.5, flipud=0.5, format=torchscript, fraction=1.0, freeze=None, hsv_h=0.015, hsv_s=0.7, hsv_v=0.4, imgsz=640, iou=0.7, keras=False, kobj=1.0, line_width=None, lr0=0.01, lrf=0.01, mask_ratio=4, max_det=300, mixup=0.0, mode=train, model=yolo26m.pt, momentum=0.937, mosaic=1.0, multi_scale=0.0, name=yolo26m_640_20261119_185313, nbs=64, nms=False, opset=None, optimize=False, optimizer=auto, overlap_mask=True, patience=20, perspective=0.0, plots=True, pose=12.0, pretrained=True, profile=False, project=None, quantize=None, rect=False, resume=False, retina_masks=False, rle=1.0, save=True, save_conf=False, save_crop=False, save_dir=D:\yoloTrain\runs\detect\yolo26m_640_20261119_185313, save_frames=False, save_json=False, save_period=-1, save_txt=False, scale=0.5, seed=0, shear=0.0, show=False, show_boxes=True, show_conf=True, show_labels=True, simplify=True, single_cls=False, source=None, split=val, stream_buffer=False, task=detect, time=None, tracker=tracktrack.yaml, translate=0.1, val=True, verbose=True, vid_stride=1, visualize=False, warmup_bias_lr=0.1, warmup_epochs=3.0, warmup_momentum=0.8, weight_decay=0.0005, workers=4, workspace=None
+Overriding model.yaml nc=80 with nc=25
+
+                   from  n    params  module                                       arguments                     
+  0                  -1  1      1856  ultralytics.nn.modules.conv.Conv             [3, 64, 3, 2]                 
+  1                  -1  1     73984  ultralytics.nn.modules.conv.Conv             [64, 128, 3, 2]               
+  2                  -1  1    111872  ultralytics.nn.modules.block.C3k2            [128, 256, 1, True, 0.25]     
+  3                  -1  1    590336  ultralytics.nn.modules.conv.Conv             [256, 256, 3, 2]              
+  4                  -1  1    444928  ultralytics.nn.modules.block.C3k2            [256, 512, 1, True, 0.25]     
+  5                  -1  1   2360320  ultralytics.nn.modules.conv.Conv             [512, 512, 3, 2]              
+  6                  -1  1   1380352  ultralytics.nn.modules.block.C3k2            [512, 512, 1, True]           
+  7                  -1  1   2360320  ultralytics.nn.modules.conv.Conv             [512, 512, 3, 2]              
+  8                  -1  1   1380352  ultralytics.nn.modules.block.C3k2            [512, 512, 1, True]           
+  9                  -1  1    656896  ultralytics.nn.modules.block.SPPF            [512, 512, 5, 3, True]        
+ 10                  -1  1    990976  ultralytics.nn.modules.block.C2PSA           [512, 512, 1]                 
+ 11                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']          
+ 12             [-1, 6]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 13                  -1  1   1642496  ultralytics.nn.modules.block.C3k2            [1024, 512, 1, True]          
+ 14                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']          
+ 15             [-1, 4]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 16                  -1  1    542720  ultralytics.nn.modules.block.C3k2            [1024, 256, 1, True]          
+ 17                  -1  1    590336  ultralytics.nn.modules.conv.Conv             [256, 256, 3, 2]              
+ 18            [-1, 13]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 19                  -1  1   1511424  ultralytics.nn.modules.block.C3k2            [768, 512, 1, True]           
+ 20                  -1  1   2360320  ultralytics.nn.modules.conv.Conv             [512, 512, 3, 2]              
+ 21            [-1, 10]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 22                  -1  1   1974784  ultralytics.nn.modules.block.C3k2            [1024, 512, 1, True, 0.5, True]
+ 23        [16, 19, 22]  1   2837166  ultralytics.nn.modules.head.Detect           [25, 1, True, [256, 512, 512]]
+YOLO26m summary: 280 layers, 21,811,438 parameters, 21,811,438 gradients, 74.9 GFLOPs
+
+Transferred 756/768 items from pretrained weights
+AMP: running Automatic Mixed Precision (AMP) checks...
+AMP: checks passed 
+train: Fast image access  (ping: 0.10.0 ms, read: 1774.61308.5 MB/s, size: 2278.6 KB)
+
+train: Scanning D:\yoloTrain\data\train\labels... 5787 images, 257 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 5787/5787 162.1it/s 35.7s
+train: New cache created: D:\yoloTrain\data\train\labels.cache
+val: Fast image access  (ping: 0.00.0 ms, read: 2450.9142.1 MB/s, size: 2533.4 KB)
+
+val: Scanning D:\yoloTrain\data\validation\labels.cache... 641 images, 33 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 641/641  0.0s
+optimizer: 'optimizer=auto' found, ignoring 'lr0=0.01' and 'momentum=0.937' and determining best 'optimizer', 'lr0' and 'momentum' automatically... 
+optimizer: MuSGD(lr=0.01, momentum=0.9) with parameter groups 124 weight(decay=0.0), 136 weight(decay=0.00046875), 136 bias(decay=0.0)
+Plotting labels to D:\yoloTrain\runs\detect\yolo26m_640_20261119_185313\labels.jpg... 
+Image sizes 640 train, 640 val
+Using 4 dataloader workers
+Logging results to D:\yoloTrain\runs\detect\yolo26m_640_20261119_185313
+Starting training for 150 epochs...
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+
+      1/150      6.77G      1.187       4.27   0.002946         11        640: 100% ━━━━━━━━━━━━ 483/483 3.1it/s 2:36
+
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 27/27 3.3it/s 8.2s
+                   all        641        925      0.563      0.467      0.519      0.393
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+
+      2/150      6.98G      1.048      1.194   0.002595          8        640: 100% ━━━━━━━━━━━━ 483/483 1.4s/it 10:58
+
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 27/27 4.0it/s 6.8s
+                   all        641        925      0.738      0.548      0.639      0.465
+
+      Epoch    GPU_mem   box_loss   cls_loss    l1_loss  Instances       Size
+
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+forrtl: error (200): program aborting due to window-CLOSE event
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+forrtl: error (200): program aborting due to window-CLOSE event
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+forrtl: error (200): program aborting due to window-CLOSE event
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+forrtl: error (200): program aborting due to window-CLOSE event
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+forrtl: error (200): program aborting due to window-CLOSE event
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FF82EC979FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FF830A4DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FF831AF9C5C  Unknown               Unknown  Unknown
+^C
