@@ -42,12 +42,17 @@ set "IMGSZ=640"
 rem Colour augmentation. Ultralytics defaults are hsv_h=0.015 hsv_s=0.7 hsv_v=0.4 (strong).
 rem The sorter uses fixed camera and lighting, so weaker colour jitter helps colour-defined classes.
 rem To go back to the defaults: set "HSV_ARGS=" and set "RUN_TAG="
-set "HSV_ARGS=hsv_h=0.005 hsv_s=0.3 hsv_v=0.2"
-set "RUN_TAG=_lowhsv"
+rem Low colour jitter (lowhsv) improved colour classes but hurt Spider/Hair, so it is off.
+rem Example: set "HSV_ARGS=hsv_h=0.005 hsv_s=0.3 hsv_v=0.2" and set "RUN_TAG=_lowhsv"
+set "HSV_ARGS="
+set "RUN_TAG="
 rem Absolute mAP50-95 gain: 0.002 = 0.2 percentage points.
 set "MIN_GAIN=0.002"
 rem Optional per-class AP guard; example: --max_class_drop 0.02
 set "CLASS_GUARD_ARGS="
+rem Champion choice gives extra weight to irregular-shape foreign objects (other classes count 1).
+rem Leave empty for plain mAP50-95: set "CLASS_WEIGHTS="
+set "CLASS_WEIGHTS=Spider=3,Hair=3,dust_clump=3,Stone=2"
 set "RUN=%MODEL%_%IMGSZ%%RUN_TAG%_%TS%"
 rem Remember the run name so export_and_train.bat can find it
 > "%~dp0last_run.txt" echo %RUN%
@@ -127,7 +132,7 @@ if /i "%MODEL:~0,6%"=="yolo26" (
     set "DEPLOY_ARGS="
     echo [i] %MODEL%: compare only. Not copied to rice app / Label Studio - upgrade ultralytics there first.
 )
-"%VENV_PYTHON%" compare_and_deploy.py --imgsz %IMGSZ% --new "%src%" --snapshot "validation_history\%RUN%\manifest.json" --min_gain %MIN_GAIN% %CLASS_GUARD_ARGS% %DEPLOY_ARGS%
+"%VENV_PYTHON%" compare_and_deploy.py --imgsz %IMGSZ% --new "%src%" --snapshot "validation_history\%RUN%\manifest.json" --min_gain %MIN_GAIN% --class_weights "%CLASS_WEIGHTS%" %CLASS_GUARD_ARGS% %DEPLOY_ARGS%
 set "COMPARE_RC=!errorlevel!"
 if "!COMPARE_RC!"=="3" (
     echo [WARNING] Comparison succeeded, but some deployments failed. See comparison JSON.
