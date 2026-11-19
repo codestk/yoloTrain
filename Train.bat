@@ -39,11 +39,16 @@ for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss
 rem ---- Model settings: change only these two lines to switch model / image size ----
 set "MODEL=yolo26m"
 set "IMGSZ=640"
+rem Colour augmentation. Ultralytics defaults are hsv_h=0.015 hsv_s=0.7 hsv_v=0.4 (strong).
+rem The sorter uses fixed camera and lighting, so weaker colour jitter helps colour-defined classes.
+rem To go back to the defaults: set "HSV_ARGS=" and set "RUN_TAG="
+set "HSV_ARGS=hsv_h=0.005 hsv_s=0.3 hsv_v=0.2"
+set "RUN_TAG=_lowhsv"
 rem Absolute mAP50-95 gain: 0.002 = 0.2 percentage points.
 set "MIN_GAIN=0.002"
 rem Optional per-class AP guard; example: --max_class_drop 0.02
 set "CLASS_GUARD_ARGS="
-set "RUN=%MODEL%_%IMGSZ%_%TS%"
+set "RUN=%MODEL%_%IMGSZ%%RUN_TAG%_%TS%"
 rem Remember the run name so export_and_train.bat can find it
 > "%~dp0last_run.txt" echo %RUN%
 echo Run name: %RUN%
@@ -91,7 +96,7 @@ rem yolo detect train data=data.yaml model=yolov8m.pt imgsz=640 epochs=150 patie
  
 rem Best command for training YOLOv8m with specific parameters:
 rem yolo detect train data=data.yaml model=yolov8m.pt imgsz=640 epochs=150 patience=40 batch=12 workers=4 device=0 cos_lr=True close_mosaic=70 flipud=0.5 fliplr=0.5 seed=0 name=train_m640_close70
-"%VENV_YOLO%" detect train data=data.yaml model=%MODEL%.pt imgsz=%IMGSZ% epochs=150 patience=20 batch=12 workers=4 device=0 cos_lr=True close_mosaic=70 flipud=0.5 fliplr=0.5 seed=0 name=%RUN%
+"%VENV_YOLO%" detect train data=data.yaml model=%MODEL%.pt imgsz=%IMGSZ% epochs=150 patience=20 batch=12 workers=4 device=0 cos_lr=True close_mosaic=70 flipud=0.5 fliplr=0.5 seed=0 %HSV_ARGS% name=%RUN%
 if errorlevel 1 (
     echo [ERROR] Training failed. Comparison will not run.
     set "EXIT_CODE=1"
