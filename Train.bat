@@ -37,7 +37,7 @@ echo.
 echo [Step 1/4] Keeping old runs (no cleanup). data\train and data\validation are rebuilt in step 2.
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set "TS=%%i"
 rem ---- Model settings: change only these two lines to switch model / image size ----
-set "MODEL=yolo26m"
+set "MODEL=yolov8m"
 set "IMGSZ=640"
 rem Colour augmentation. Ultralytics defaults are hsv_h=0.015 hsv_s=0.7 hsv_v=0.4 (strong).
 rem The sorter uses fixed camera and lighting, so weaker colour jitter helps colour-defined classes.
