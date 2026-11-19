@@ -12,8 +12,10 @@ set "PROJECT_ID=9"
 set "LS_CONTAINER=label-studio-label-studio-1"
 set "UPLOAD_DIR=D:\docker\label-studio\media\upload\9"
 set "PY=%ROOT%\venv\Scripts\python.exe"
-rem 1 = shut down after SUCCESS only; failures keep the PC on. 0 = keep it on
+rem 1 = shut the PC down after a SUCCESSFUL run, 0 = keep it on
 set "DO_SHUTDOWN=1"
+rem 1 = also shut the PC down after a FAILED run (the log is saved first), 0 = keep it on to read the error
+set "SHUTDOWN_ON_FAIL=1"
 
 rem ---- First call: start logging, then run this same file again with output copied to the log
 if /i not "%~1"=="__logged" (
@@ -27,7 +29,11 @@ if /i not "%~1"=="__logged" (
     echo.
     if "!RC!"=="0" (echo RESULT: SUCCESS) else if "!RC!"=="2" (echo RESULT: COMPLETED WITH DEPLOYMENT WARNINGS - see !RUNLOG!) else (echo RESULT: FAILED ^(exit code !RC!^) - see !RUNLOG!)
     set "SHUTDOWN_NOW=0"
-    if "%DO_SHUTDOWN%"=="1" if "!RC!"=="0" set "SHUTDOWN_NOW=1"
+    set "RUN_OK=0"
+    if "!RC!"=="0" set "RUN_OK=1"
+    if "!RC!"=="2" set "RUN_OK=1"
+    if "%DO_SHUTDOWN%"=="1" if "!RUN_OK!"=="1" set "SHUTDOWN_NOW=1"
+    if "%SHUTDOWN_ON_FAIL%"=="1" if "!RUN_OK!"=="0" set "SHUTDOWN_NOW=1"
     if "!SHUTDOWN_NOW!"=="1" (
         echo System will force shutdown in 60 seconds... type: shutdown /a  to cancel
         shutdown /s /f /t 60
