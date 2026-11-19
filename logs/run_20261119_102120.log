@@ -1,0 +1,11 @@
+﻿[Thu 11/19/2026 10:21:20] ===== START  Thu 11/19/2026 10:21:20.39 =====
+[Thu 11/19/2026 10:21:20] Computer: PC-MAX   User: momojojo   Folder: D:\yoloTrain
+[Thu 11/19/2026 10:21:20] [STEP 0 - pre-checks]
+Python 3.11.6
+ultralytics 8.4.104 | torch 2.12.0.dev20260408+cu128 | CUDA True
+NVIDIA GeForce RTX 5060, 831 MiB, 8151 MiB
+[Thu 11/19/2026 10:21:26] Scripts present: OK
+[Thu 11/19/2026 10:21:26] Images in D:\docker\label-studio\media\upload\9: 11732
+[Thu 11/19/2026 10:21:26] Champion model: present
+[Thu 11/19/2026 10:21:26] Frozen val list: present
+^CTerminate batch job (Y/N)? 

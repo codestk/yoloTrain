@@ -1,0 +1,16 @@
+{
+  "audit_model": "D:\\yoloTrain\\runs\\detect\\yolo26m_640_lowhsv_20261119_105550\\weights\\best.pt",
+  "val_manifest": "D:\\yoloTrain\\val_split.txt",
+  "validation_policy": "format_only",
+  "images": 6429,
+  "classes": 25,
+  "issues": 353,
+  "issues_by_type": {
+    "human_box_not_matched": 165,
+    "possible_missing_annotation": 185,
+    "class_disagreement": 3
+  },
+  "tasks_mapped": 5993,
+  "ambiguous_task_matches": 436,
+  "warning": "Model disagreement is not proof of incorrect human annotation. Do not change labels just to reach zero alerts."
+}
