@@ -98,7 +98,7 @@ rem yolo detect train data=data.yaml model=yolov8m.pt imgsz=640 epochs=150 patie
  
 rem Best command for training YOLOv8m with specific parameters:
 rem yolo detect train data=data.yaml model=yolov8m.pt imgsz=640 epochs=150 patience=40 batch=12 workers=4 device=0 cos_lr=True close_mosaic=70 flipud=0.5 fliplr=0.5 seed=0 name=train_m640_close70
-"%VENV_YOLO%" detect train data=data.yaml model=%MODEL%.pt imgsz=%IMGSZ% epochs=150 patience=20 batch=12 workers=4 device=0 cos_lr=True close_mosaic=70 flipud=0.5 fliplr=0.5 seed=0 %HSV_ARGS% name=%RUN%
+"%VENV_YOLO%" detect train data=data.yaml model=%MODEL%.pt imgsz=%IMGSZ% epochs=150 patience=40 batch=12 workers=4 device=0 cos_lr=True close_mosaic=70 flipud=0.5 fliplr=0.5 seed=0 %HSV_ARGS% name=%RUN%
 if errorlevel 1 (
     echo [ERROR] Training failed. Comparison will not run.
     set "EXIT_CODE=1"
