@@ -122,13 +122,9 @@ if not exist "%src%" (
     set "EXIT_CODE=1"
     goto :END
 )
-REM YOLO26 needs ultralytics 8.4+. The rice app (8.3.225) and the Label Studio ML backends
-REM may not load it yet, so for yolo26 models only compare - do not copy to the apps.
+REM All models (including YOLO26) are copied to the rice app and Label Studio when promoted.
+REM Both now run ultralytics 8.4+.
 set "DEPLOY_ARGS=--dest "%dst2%" --dest "%dst3%""
-if /i "%MODEL:~0,6%"=="yolo26" (
-    set "DEPLOY_ARGS="
-    echo [i] %MODEL%: compare only. Not copied to rice app / Label Studio - upgrade ultralytics there first.
-)
 "%VENV_PYTHON%" compare_and_deploy.py --imgsz %IMGSZ% --new "%src%" --snapshot "validation_history\%RUN%\manifest.json" --min_gain %MIN_GAIN% %CLASS_GUARD_ARGS% %DEPLOY_ARGS%
 set "COMPARE_RC=!errorlevel!"
 if "!COMPARE_RC!"=="3" (
