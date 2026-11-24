@@ -2,15 +2,15 @@
   "audit_model": "D:\\yoloTrain\\champion\\best.pt",
   "val_manifest": "D:\\yoloTrain\\val_split.txt",
   "validation_policy": "format_only",
-  "images": 6428,
+  "images": 6533,
   "classes": 25,
-  "issues": 491,
+  "issues": 222,
   "issues_by_type": {
-    "possible_missing_annotation": 229,
-    "human_box_not_matched": 243,
-    "class_disagreement": 19
+    "human_box_not_matched": 121,
+    "possible_missing_annotation": 96,
+    "class_disagreement": 5
   },
-  "tasks_mapped": 5992,
-  "ambiguous_task_matches": 436,
+  "tasks_mapped": 6095,
+  "ambiguous_task_matches": 438,
   "warning": "Model disagreement is not proof of incorrect human annotation. Do not change labels just to reach zero alerts."
 }
