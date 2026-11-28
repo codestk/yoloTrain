@@ -1,0 +1,117 @@
+﻿[Sat 11/28/2026 19:07:57] ===== START  Sat 11/28/2026 19:07:57.48 =====
+[Sat 11/28/2026 19:07:57] Computer: PC-MAX   User: momojojo   Folder: D:\yoloTrain
+[Sat 11/28/2026 19:07:57] [STEP 0 - pre-checks]
+Python 3.11.6
+WARNING Ultralytics settings reset to default values. This may be due to a possible problem with your settings or a recent ultralytics package update. 
+View Ultralytics Settings with 'yolo settings' or at 'C:\Users\momojojo\AppData\Roaming\Ultralytics\settings.json'
+Update Settings with 'yolo settings key=value', i.e. 'yolo settings runs_dir=path/to/dir'. For help see https://docs.ultralytics.com/quickstart/#ultralytics-settings.
+ultralytics 8.4.104 | torch 2.12.0.dev20260408+cu128 | CUDA True
+NVIDIA GeForce RTX 5060, 1486 MiB, 8151 MiB
+[Sat 11/28/2026 19:08:02] Scripts present: OK
+[Sat 11/28/2026 19:08:02] Images in D:\docker\label-studio\media\upload\9: 12263
+[Sat 11/28/2026 19:08:02] Champion model: present
+[Sat 11/28/2026 19:08:02] Frozen val list: present
+label-studio-label-studio-1  Up 4 hours
+[Sat 11/28/2026 19:08:02] Docker container: running
+[Sat 11/28/2026 19:08:02] [STEP 1 - clear custom_data]
+[Sat 11/28/2026 19:08:05] custom_data emptied
+[Sat 11/28/2026 19:08:05] [STEP 2 - export JSON from Label Studio]
+[Sat 11/28/2026 19:08:05] docker exec label-studio-label-studio-1 label-studio export 9 JSON --export-path=/yolo_export
+=> Database and media directory: /label-studio/data
+=> Static URL is set to: /static/
+=> Database and media directory: /label-studio/data
+=> Static URL is set to: /static/
+Read environment variables from: /label-studio/data/.env
+get 'SECRET_KEY' casted as '<class 'str'>' with default ''
+Starting new HTTPS connection (1): pypi.org:443
+https://pypi.org:443 "GET /pypi/label-studio/json HTTP/1.1" 200 41138
+╔════════════════════════════════╗                                              
+║Update available 1.23.0 → 1.23.2║                                              
+║Run pip install -U label-studio ║                                              
+╚════════════════════════════════╝                                              
+
+/label-studio/.venv/lib/python3.13/site-packages/django/db/backends/utils.py:98: RuntimeWarning: Accessing the database during app initialization is discouraged. To fix this warning, avoid executing queries in AppConfig.ready() or when your app modules are imported.
+  warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)
+[Sat 11/28/2026 19:08:40] docker export exit code: 0
+[Sat 11/28/2026 19:08:40] Waiting for the JSON file in D:\yoloTrain\custom_data (max 10 minutes)...
+[Sat 11/28/2026 19:08:45] JSON found after 0 s: D:\yoloTrain\custom_data\project-9-at-2026-11-28-12-08-479bed62.json  (13293157 bytes)
+[Sat 11/28/2026 19:08:45] [STEP 3 - build YOLO dataset from JSON + images]
+{
+  "tasks": 6953,
+  "written": 6949,
+  "background": 307,
+  "boxes": 9963,
+  "skipped_unlabeled": 1,
+  "skipped_cancelled": 3,
+  "missing_image": 0,
+  "duplicate_name": 0
+}
+Done.
+[Sat 11/28/2026 19:08:47] ls_json_to_yolo.py exit code: 0
+[Sat 11/28/2026 19:08:47] custom_data: 6949 images, 6949 label files
+[Sat 11/28/2026 19:08:47] [STEP 4-5 - split + train + compare (Train.bat)]  started 19:08:47.86
+================================================================
+  Starting Automatic Full YOLO Workflow...
+  Start Time : 19:08:47.97
+================================================================
+
+[Step 1/4] Keeping old runs (no cleanup). data\train and data\validation are rebuilt in step 2.
+Run name: yolo26s_640_20261128_190848
+
+[Step 2/4] Preparing dataset split and YAML...
+Found 6949 image files.
+Using frozen validation list val_split.txt (687 images).
+New images: 68 -> 8 to validation, 60 to train.
+Note: 4 validation images listed in val_split.txt are no longer in custom_data.
+Train: 6258 images, Validation: 691 images.
+Data splitting process complete.
+Created config file at data.yaml
+
+File contents:
+
+Validation version: 9d1cc99d390d4410d94f38b186affae98c2a831cf442a9dc8218dba9e9f1ca8e; snapshot: validation_history\yolo26s_640_20261128_190848
+Data preparation complete.
+
+[ขั้นตอนที่ 3/4] กำลังเริ่มการฝึกสอนโมเดล yolo26s ...
+New https://pypi.org/project/ultralytics/8.4.220 available  Update with 'pip install -U ultralytics'
+Ultralytics 8.4.104  Python-3.11.6 torch-2.12.0.dev20260408+cu128 CUDA:0 (NVIDIA GeForce RTX 5060, 8151MiB)
+engine\trainer: agnostic_nms=False, amp=True, angle=1.0, augment=False, auto_augment=randaugment, batch=12, bgr=0.0, box=7.5, cache=False, cfg=None, classes=None, close_mosaic=70, cls=0.5, cls_pw=0.0, cls_remap=True, compile=False, conf=None, copy_paste=0.0, copy_paste_mode=flip, cos_lr=True, cutmix=0.0, data=data.yaml, degrees=0.0, deterministic=True, device=0, dfl=1.5, dgrad=0.5, dis=6.0, distill_model=None, dlam=1.0, dlog=1.0, dnn=False, dropout=0.0, dynamic=False, embed=None, end2end=None, epochs=150, erasing=0.4, exist_ok=False, fliplr=0.5, flipud=0.5, format=torchscript, fraction=1.0, freeze=None, hsv_h=0.015, hsv_s=0.7, hsv_v=0.4, imgsz=640, iou=0.7, keras=False, kobj=1.0, line_width=None, lr0=0.01, lrf=0.01, mask_ratio=4, max_det=300, mixup=0.0, mode=train, model=yolo26s.pt, momentum=0.937, mosaic=1.0, multi_scale=0.0, name=yolo26s_640_20261128_190848, nbs=64, nms=False, opset=None, optimize=False, optimizer=auto, overlap_mask=True, patience=40, perspective=0.0, plots=True, pose=12.0, pretrained=True, profile=False, project=None, quantize=None, rect=False, resume=False, retina_masks=False, rle=1.0, save=True, save_conf=False, save_crop=False, save_dir=D:\yoloTrain\runs\detect\yolo26s_640_20261128_190848, save_frames=False, save_json=False, save_period=-1, save_txt=False, scale=0.5, seed=0, shear=0.0, show=False, show_boxes=True, show_conf=True, show_labels=True, simplify=True, single_cls=False, source=None, split=val, stream_buffer=False, task=detect, time=None, tracker=tracktrack.yaml, translate=0.1, val=True, verbose=True, vid_stride=1, visualize=False, warmup_bias_lr=0.1, warmup_epochs=3.0, warmup_momentum=0.8, weight_decay=0.0005, workers=4, workspace=None
+Overriding model.yaml nc=80 with nc=25
+
+                   from  n    params  module                                       arguments                     
+  0                  -1  1       928  ultralytics.nn.modules.conv.Conv             [3, 32, 3, 2]                 
+  1                  -1  1     18560  ultralytics.nn.modules.conv.Conv             [32, 64, 3, 2]                
+  2                  -1  1     26080  ultralytics.nn.modules.block.C3k2            [64, 128, 1, False, 0.25]     
+  3                  -1  1    147712  ultralytics.nn.modules.conv.Conv             [128, 128, 3, 2]              
+  4                  -1  1    103360  ultralytics.nn.modules.block.C3k2            [128, 256, 1, False, 0.25]    
+  5                  -1  1    590336  ultralytics.nn.modules.conv.Conv             [256, 256, 3, 2]              
+  6                  -1  1    346112  ultralytics.nn.modules.block.C3k2            [256, 256, 1, True]           
+  7                  -1  1   1180672  ultralytics.nn.modules.conv.Conv             [256, 512, 3, 2]              
+  8                  -1  1   1380352  ultralytics.nn.modules.block.C3k2            [512, 512, 1, True]           
+  9                  -1  1    656896  ultralytics.nn.modules.block.SPPF            [512, 512, 5, 3, True]        
+ 10                  -1  1    990976  ultralytics.nn.modules.block.C2PSA           [512, 512, 1]                 
+ 11                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']          
+ 12             [-1, 6]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 13                  -1  1    477184  ultralytics.nn.modules.block.C3k2            [768, 256, 1, True]           
+ 14                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']          
+ 15             [-1, 4]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 16                  -1  1    136192  ultralytics.nn.modules.block.C3k2            [512, 128, 1, True]           
+ 17                  -1  1    147712  ultralytics.nn.modules.conv.Conv             [128, 128, 3, 2]              
+ 18            [-1, 13]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 19                  -1  1    378880  ultralytics.nn.modules.block.C3k2            [384, 256, 1, True]           
+ 20                  -1  1    590336  ultralytics.nn.modules.conv.Conv             [256, 256, 3, 2]              
+ 21            [-1, 10]  1         0  ultralytics.nn.modules.conv.Concat           [1]                           
+ 22                  -1  1   1843712  ultralytics.nn.modules.block.C3k2            [768, 512, 1, True, 0.5, True]
+ 23        [16, 19, 22]  1    951214  ultralytics.nn.modules.head.Detect           [25, 1, True, [128, 256, 512]]
+YOLO26s summary: 260 layers, 9,967,214 parameters, 9,967,214 gradients, 22.6 GFLOPs
+
+Transferred 696/708 items from pretrained weights
+AMP: running Automatic Mixed Precision (AMP) checks...
+AMP: checks passed 
+train: Fast image access  (ping: 0.10.1 ms, read: 1632.21157.8 MB/s, size: 2263.7 KB)
+
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FFB69D679FD  Unknown               Unknown  Unknown
+KERNEL32.dll       00007FFB6B55DDA7  Unknown               Unknown  Unknown
+ntdll.dll          00007FFB6C919C5C  Unknown               Unknown  Unknown
+^CTerminate batch job (Y/N)? 
