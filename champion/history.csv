@@ -15,3 +15,4 @@ time,new_model,new_map50_95,new_map50,champ_map50_95,champ_map50,promoted
 20261125_004436_304129,D:\yoloTrain\runs\detect\yolo26s_640_20261124_212359\weights\best.pt,0.7523,0.8938,0.7710,0.9090,False
 20261125_231418_043303,D:\yoloTrain\runs\detect\yolo26s_640_20261125_200233\weights\best.pt,0.7647,0.9145,0.7487,0.8885,True
 20261127_021430_641084,D:\yoloTrain\runs\detect\yolo26s_640_20261126_224817\weights\best.pt,0.7795,0.9269,0.7606,0.9082,True
+20261128_000318_316199,D:\yoloTrain\runs\detect\yolo26s_640_20261127_203211\weights\best.pt,0.7867,0.9210,0.7913,0.9302,False
